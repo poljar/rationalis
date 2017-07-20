@@ -7,6 +7,7 @@ import Data.String
 import Control.Lens
 import Data.Aeson.Lens
 
+import Data.Maybe
 import Data.Time
 import Data.Time.Format
 import Data.Scientific
@@ -26,11 +27,8 @@ import qualified Network.Wreq.Session as S
 import qualified Data.ByteString.Lazy as B
 
 
-jsonFile :: FilePath
-jsonFile = "pbz.json"
-
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
+getJSON :: FilePath -> IO B.ByteString
+getJSON jsonFile = B.readFile jsonFile
 
 -- login
 -- https://net.pbz.hr/pbz365/logonForm.htm
@@ -40,6 +38,7 @@ getJSON = B.readFile jsonFile
 
 data Options = Options
     { period :: Period
+    , json   :: FilePath
     }
 
 periodReader :: ReadM (Period)
@@ -48,6 +47,7 @@ periodReader = eitherReader $ \arg ->
       Nothing -> Left $ trace(arg) $ ("Cannot parse date: " ++ arg)
       Just period -> Right period
 
+-- TODO period should be mandatory only for network fetching
 argparse :: Parser Options
 argparse = Options
       <$> option periodReader
@@ -55,19 +55,12 @@ argparse = Options
          <> short 'p'
          <> metavar "PERIOD"
          <> help "Fetch transactions only for the given time-period." )
-
-{-
-main :: IO ()
-main = parser =<< execParser opts
-  where
-    opts = info (argparse <**> helper)
-      ( fullDesc
-     <> progDesc "Fetch transaction data and convert it to ledger transactions."
-     <> header "bankfetcher - a bank transaction fetcher" )
-
-parser :: Options -> IO ()
-parser (Options p) = putStrLn $ "Hello " ++ show p
--}
+      <*>
+          strOption
+          ( long "json-file"
+         <> short 'j'
+         <> metavar "JSON"
+         <> help "JSON file to use instead of fetching it automatically." )
 
 data Transaction = Transaction
     { date        :: Day
@@ -75,11 +68,28 @@ data Transaction = Transaction
     , payAmount   :: Maybe Float
     , recAmount   :: Maybe Float
     , currency    :: String
-} deriving (Show)
+    } deriving (Show)
+
+-- TODO amount shold come from either pay or rec and payee and payer should be
+-- swapped depending on pay or rec
+-- TODO indentation should be based on the lengths of the payer/payee accounts
+-- TODO replace ??? using regex based rules
+printTransaction :: Transaction -> IO ()
+printTransaction (Transaction day description pay rec currency) = do
+    putStrLn descriptionLine
+    putStrLn payeeLine
+    putStrLn payerLine
+        where descriptionLine = d ++ " * " ++ description
+              d = formatTime defaultTimeLocale "%Y/%m/%d" day
+              payeeLine = indent ++ "Expenses:???" ++ indent ++ (show $ fromJust amount)
+              payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ (show $ fromJust amount)
+              indent = "    "
+              amount = pay
 
 parseDate :: T.Text -> Day
 parseDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
 
+-- TODO ^?! aborts if it can't get the value
 filterTransactions :: B.ByteString -> [Transaction]
 filterTransactions jsonData = jsonData ^.. members . key "result" . members .
     key "bankAccountTransactionList" . _Array .
@@ -93,6 +103,15 @@ filterTransactions jsonData = jsonData ^.. members . key "result" . members .
         )
 
 main :: IO ()
-main = do
-    jsonData <- getJSON
-    print $ filterTransactions jsonData
+main = parser =<< execParser opts
+  where
+    opts = info (argparse <**> helper)
+      ( fullDesc
+     <> progDesc "Fetch transaction data and convert it to ledger transactions."
+     <> header "bankfetcher - a bank transaction fetcher" )
+
+parser :: Options -> IO ()
+parser (Options p j) = do
+    putStrLn $ "Hello " ++ show p
+    jsonData <- getJSON j
+    mapM_ printTransaction $ filterTransactions jsonData
