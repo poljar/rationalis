@@ -18,6 +18,11 @@ library
   exposed-modules:     Lib
   build-depends:       base >= 4.7 && < 5
                      , time
+                     , text
+                     , lens
+                     , scientific
+                     , bytestring
+                     , lens-aeson
   default-language:    Haskell2010
 
 executable bankscraper
@@ -26,11 +31,7 @@ executable bankscraper
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , bytestring
-                     , lens-aeson
-                     , text
-                     , scientific
                      , time
-                     , lens
                      , optparse-applicative
                      , wreq
                      , bankscraper
