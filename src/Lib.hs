@@ -88,21 +88,27 @@ data Transaction = Transaction
     , currency    :: String
     } deriving (Show)
 
--- TODO amount shold come from either pay or rec and payee and payer should be
--- swapped depending on pay or rec
 -- TODO indentation should be based on the lengths of the payer/payee accounts
+-- some pretty printing lib pretty please?
 -- TODO replace ??? using regex based rules
 printTransaction :: Transaction -> IO ()
 printTransaction (Transaction day description pay rec currency) = do
     putStrLn descriptionLine
     putStrLn payeeLine
     putStrLn payerLine
+    putStrLn ""
         where descriptionLine = d ++ " * " ++ description
               d = formatTime defaultTimeLocale "%Y/%m/%d" day
-              payeeLine = indent ++ "Expenses:???" ++ indent ++ (show $ fromJust amount)
-              payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ (show $ fromJust amount)
+              payeeLine = indent ++ "Expenses:???" ++ indent ++ (show amount)
+                          ++ " " ++ currency
+              payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ (show amount)
+                          ++ " " ++ currency
               indent = "    "
-              amount = pay
+              amount = case pay of
+                    Just pay -> pay
+                    Nothing  -> case rec of
+                        Just rec -> rec
+                        Nothing  -> 0.0
 
 parseDate :: T.Text -> Day
 parseDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
