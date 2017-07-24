@@ -31,6 +31,7 @@ executable bankscraper
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , bytestring
+                     , text
                      , time
                      , optparse-applicative
                      , wreq

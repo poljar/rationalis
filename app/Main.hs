@@ -36,6 +36,7 @@ periodReader = eitherReader $ \arg ->
           Nothing -> Left ("Cannot parse date: " ++ arg)
           Just period -> Right period
 
+periodOption :: Parser Period
 periodOption = option periodReader
               ( long "period"
                  <> short 'p'
@@ -45,7 +46,7 @@ periodOption = option periodReader
 
 data Command
     = Fetch Period
-    | Convert FilePath
+    | Convert (Maybe FilePath)
 
 data Options = Options Command
 
@@ -62,21 +63,23 @@ withInfo :: Parser a -> String -> ParserInfo a
 withInfo opts desc = info (helper <*> opts) $ progDesc desc
 
 parseFetch :: Parser Command
-parseFetch = Fetch
-    <$> periodOption
+parseFetch = Fetch <$> periodOption
 
-{-
-parseFetch :: Parser Command
-parseFetch = Convert
-    <$> periodOption
--}
+parseConvert :: Parser Command
+parseConvert = Convert <$>
+    ( optional $ strOption $
+       long  "input-file"
+    <> short 'i'
+    <> metavar "INFILE"
+    <> help "JSON file to convert."
+    )
 
 parseCommand :: Parser Command
 parseCommand = subparser $
-    command "fetch"     (parseFetch   `withInfo`
-        "Fetch transaction data from the server.")
---    command "convert"   (parseConvert `withInfo`
---        "Convert a json file containing transaction data to ledger entries")
+        command "fetch"     (parseFetch   `withInfo`
+            "Fetch transaction data from the server.")
+     <> command "convert"   (parseConvert `withInfo`
+            "Convert a json file containing transaction data to ledger entries.")
 
 parseOptions :: Parser Options
 parseOptions = Options <$> parseCommand
@@ -84,4 +87,10 @@ parseOptions = Options <$> parseCommand
 run :: Options -> IO ()
 run (Options cmd) = do
     case cmd of
-      Fetch period -> putStrLn "fetch"
+      Fetch period -> putStrLn $ show period
+      Convert file ->
+          case file of
+            Nothing   -> undefined
+            Just file -> do
+                inputData <- getJSON file
+                mapM_ printTransaction $ filterTransactions inputData
