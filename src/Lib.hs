@@ -114,7 +114,7 @@ parseDate :: T.Text -> Day
 parseDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
 
 -- TODO ^?! aborts if it can't get the value
-filterTransactions :: B.ByteString -> [Transaction]
+filterTransactions :: Data.Aeson.Lens.AsValue s => s -> [Transaction]
 filterTransactions jsonData = jsonData ^.. members . key "result" . members .
     key "bankAccountTransactionList" . _Array .
     traverse . to (\t -> Transaction
