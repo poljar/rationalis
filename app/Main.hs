@@ -71,7 +71,7 @@ parseConvert = Convert <$>
        long  "input-file"
     <> short 'i'
     <> metavar "INFILE"
-    <> help "JSON file to convert."
+    <> help "Input file to convert."
     )
 
 parseCommand :: Parser Command
