@@ -1,0 +1,89 @@
+.Dd July 24, 2017
+.Dt RATIONALIS 1
+.Os
+.Sh NAME
+.Nm rationalis
+.Nd Automatic accounting command-line tool
+.Sh SYNOPSIS
+.Nm
+.Cm convert
+.Op Fl i Ar file
+.Op Fl o Ar file
+.Nm
+.Cm fetch
+.Ar account
+.Op Fl o Ar file
+.Fl p Ar period
+.Op Fl P Ar password
+.Nm
+.Cm pull
+TODO
+.Sh DESCRIPTION
+Accounting is boring, let a
+.Nm
+do it for you.
+.Nm
+is a command-line tool that fetches and converts monetary transaction
+data from various sources and converts them to the
+.Xr ledger 1
+journal format.
+The conversion step can be customized using regular expressions in the rules file.
+.Pp
+The commands accepted by
+.Nm
+are as follows:
+.Bl -tag -width 3n
+.It Cm convert
+Convert transactions to the
+.Xr ledger 1 journal format.
+The command line flags to change the behaviour of the command
+are as follows:
+.Bl -tag -width Ds
+.It Fl o,--output-file Ar file
+Specify an output
+.Ar file ,
+if the flag is not provided stdout is used.
+.It Fl i,--input-file Ar file
+Specify an input
+.Ar file ,
+if the flag is not provided stdin is used.
+.El
+.It Cm fetch Ar account
+Fetch transaction data from a configured
+.Ar account
+and print them out.
+The command line flags to change the behaviour of the command:
+.Bl -tag -width Ds
+.It Fl o,--output-file Ar file
+Specify an output
+.Ar file ,
+if the flag is not provided stdout is used.
+.It Fl p,--period Ar time-period
+Fetch transactions only for the given
+.Ar time-period .
+.It Fl P,--password Ar password
+Provide the
+.Ar password
+on the command line instead of asking for it.
+.El
+.It Cm pull
+TODO
+.El
+.Sh FILES
+.Bl -tag -width 34 -compact
+.It Pa $XDG_CONFIG_HOME/rationalis/config
+Default location of the configuration file.
+.Pp
+.It Pa $XDG_CONFIG_HOME/rationalis/rules
+Default location of the rules file.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr ledger 1 ,
+.Xr rationalis 5 ,
+.Xr rationalis.rules 5
+.Sh AUTHORS
+.Nm
+was written by
+.An Damir Jelić Aq Mt poljar@termina.org.uk .
