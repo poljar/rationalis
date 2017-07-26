@@ -19,6 +19,7 @@ import Data.Time.Calendar
 import Control.Lens
 import Control.Applicative
 import qualified Data.Text as T
+import qualified Text.HTML.TagSoup as TS
 import qualified Data.ByteString.Lazy as B
 import qualified Text.ParserCombinators.ReadP as RP
 
@@ -114,6 +115,9 @@ printTransaction (Transaction id day description pay rec currency) = do
 parseDate :: T.Text -> Day
 parseDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
 
+decodeHTMLentities :: String -> String
+decodeHTMLentities s = TS.fromTagText $ head $ TS.parseTags s
+
 -- TODO ^?! aborts if it can't get the value
 fromPBZ :: Data.Aeson.Lens.AsValue s => s -> [Transaction]
 fromPBZ jsonData = jsonData ^.. members . key "result" . members .
@@ -121,7 +125,7 @@ fromPBZ jsonData = jsonData ^.. members . key "result" . members .
     traverse . to (\t -> Transaction
         ( "PBZ-" ++ (t ^?! key "transactionNumber" . _String & T.unpack))
         ( t ^?! key "currencyDate" . _String & parseDate)
-        ( t ^?! key "description" . _String & T.unpack)
+        ( t ^?! key "description" . _String & T.unpack & decodeHTMLentities)
         ( t ^?  key "payAmount" . key "amount" . _Number & fmap toRealFloat)
         ( t ^?  key "receiveAmount" . key "amount" . _Number & fmap toRealFloat)
         ( t ^?! key "amountAfterTransaction" . key "currency" .
