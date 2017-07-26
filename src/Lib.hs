@@ -81,7 +81,8 @@ parseMaybe parser input =
 
 
 data Transaction = Transaction
-    { date        :: Day
+    { id          :: String
+    , date        :: Day
     , description :: String
     , payAmount   :: Maybe Float
     , recAmount   :: Maybe Float
@@ -92,7 +93,7 @@ data Transaction = Transaction
 -- some pretty printing lib pretty please?
 -- TODO replace ??? using regex based rules
 printTransaction :: Transaction -> IO ()
-printTransaction (Transaction day description pay rec currency) = do
+printTransaction (Transaction id day description pay rec currency) = do
     putStrLn descriptionLine
     putStrLn payeeLine
     putStrLn payerLine
@@ -100,7 +101,7 @@ printTransaction (Transaction day description pay rec currency) = do
         where descriptionLine = d ++ " * " ++ description
               d = formatTime defaultTimeLocale "%Y/%m/%d" day
               payeeLine = indent ++ "Expenses:???" ++ indent ++ (show amount)
-                          ++ " " ++ currency
+                          ++ " " ++ currency ++ " ; id: " ++ id
               payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ (show amount)
                           ++ " " ++ currency
               indent = "    "
@@ -118,6 +119,7 @@ fromPBZ :: Data.Aeson.Lens.AsValue s => s -> [Transaction]
 fromPBZ jsonData = jsonData ^.. members . key "result" . members .
     key "bankAccountTransactionList" . _Array .
     traverse . to (\t -> Transaction
+        ( "PBZ-" ++ (t ^?! key "transactionNumber" . _String & T.unpack))
         ( t ^?! key "currencyDate" . _String & parseDate)
         ( t ^?! key "description" . _String & T.unpack)
         ( t ^?  key "payAmount" . key "amount" . _Number & fmap toRealFloat)
