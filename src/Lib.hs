@@ -16,6 +16,7 @@ import Data.Time
 import Data.Time.Clock
 import Data.Time.Calendar
 
+import Text.Printf
 import Control.Lens
 import Control.Applicative
 import qualified Data.Text as T
@@ -93,6 +94,8 @@ data Transaction = Transaction
 -- TODO indentation should be based on the lengths of the payer/payee accounts
 -- some pretty printing lib pretty please?
 -- TODO replace ??? using regex based rules
+-- TODO pay and rec don't necessarily have to be in the same currency
+-- TODO cleanup
 printTransaction :: Transaction -> IO ()
 printTransaction (Transaction id day description pay rec currency) = do
     putStrLn descriptionLine
@@ -101,19 +104,20 @@ printTransaction (Transaction id day description pay rec currency) = do
     putStrLn ""
         where descriptionLine = d ++ " * " ++ description
               d = formatTime defaultTimeLocale "%Y/%m/%d" day
-              payeeLine = indent ++ "Expenses:???" ++ indent ++ (show amount)
+              payeeLine = indent ++ "Expenses:???" ++ indent ++ amountStr
                           ++ " " ++ currency ++ " ; id: " ++ id
-              payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ (show amount)
+              payerLine = indent ++ "Assets:PBZ" ++ indent ++ " -" ++ amountStr
                           ++ " " ++ currency
               indent = "    "
+              amountStr = printf "%2f" amount
               amount = case pay of
                     Just pay -> pay
                     Nothing  -> case rec of
                         Just rec -> rec
                         Nothing  -> 0.0
 
-parseDate :: T.Text -> Day
-parseDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
+fromPBZDate :: T.Text -> Day
+fromPBZDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
 
 decodeHTMLentities :: String -> String
 decodeHTMLentities s = TS.fromTagText $ head $ TS.parseTags s
@@ -124,7 +128,7 @@ fromPBZ jsonData = jsonData ^.. members . key "result" . members .
     key "bankAccountTransactionList" . _Array .
     traverse . to (\t -> Transaction
         ( "PBZ-" ++ (t ^?! key "transactionNumber" . _String & T.unpack))
-        ( t ^?! key "currencyDate" . _String & parseDate)
+        ( t ^?! key "currencyDate" . _String & fromPBZDate)
         ( t ^?! key "description" . _String & T.unpack & decodeHTMLentities)
         ( t ^?  key "payAmount" . key "amount" . _Number & fmap toRealFloat)
         ( t ^?  key "receiveAmount" . key "amount" . _Number & fmap toRealFloat)
