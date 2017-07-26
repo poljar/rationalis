@@ -79,7 +79,7 @@ parseCommand = subparser $
         command "fetch"     (parseFetch   `withInfo`
             "Fetch transaction data from the server.")
      <> command "convert"   (parseConvert `withInfo`
-            "Convert a json file containing transaction data to ledger entries.")
+            "Convert a a file containing transaction data to ledger entries.")
 
 parseOptions :: Parser Options
 parseOptions = Options <$> parseCommand
@@ -93,4 +93,4 @@ run (Options cmd) = do
             Nothing   -> undefined
             Just file -> do
                 inputData <- getJSON file
-                mapM_ printTransaction $ filterTransactions inputData
+                mapM_ printTransaction $ fromPBZ inputData
