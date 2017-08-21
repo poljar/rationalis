@@ -2,6 +2,7 @@
 module Main where
 
 import Lib
+import PBZ
 
 import Data.String
 
@@ -78,7 +79,7 @@ parseOptions = Options <$> parseCommand
 run :: Options -> IO ()
 run (Options cmd) = do
     case cmd of
-      Fetch period -> putStrLn $ show period
+      Fetch period -> print =<< fetchPBZ period
       Convert file ->
           case file of
             Nothing   -> undefined
