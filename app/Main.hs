@@ -16,25 +16,16 @@ import Options.Applicative
 import Control.Applicative
 import Data.Semigroup ((<>))
 
-import qualified Network.Wreq as Request
-import qualified Network.Wreq.Session as S
-
 import qualified Data.ByteString.Lazy as B
 
 getJSON :: FilePath -> IO B.ByteString
 getJSON jsonFile = B.readFile jsonFile
 
--- login
--- https://net.pbz.hr/pbz365/logonForm.htm
---
--- URL for account data via json
--- https://net.pbz.hr/pbz365/accountTurnovers/currentAccTurnovers.json
-
 periodReader :: ReadM (Period)
 periodReader = eitherReader $ \arg ->
-      case parseMaybe periodParser arg of
-          Nothing -> Left ("Cannot parse date: " ++ arg)
-          Just period -> Right period
+    case parseMaybe periodParser arg of
+        Nothing -> Left ("Cannot parse date: " ++ arg)
+        Just period -> Right period
 
 periodOption :: Parser Period
 periodOption = option periodReader
