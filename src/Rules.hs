@@ -1,5 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Rules
+    ( Rule(..)
+    , Rules
+    , Pattern(..)
+    , Objects(..)
+    , MatchVerbs(..)
+    , Action(..)
+    , ActionVerbs(..)
+    , parseRules
+    , testrule
+    )
     where
 
 import Control.Applicative (empty)
@@ -12,6 +22,10 @@ import Text.Megaparsec.String
 
 import qualified Text.Megaparsec.Lexer as L
 
+testrule :: Rule
+testrule  = Rule "nest" [Pattern Description Matches ["PBZ ATM*"]] [Action Set Description "BANKOMAT"]
+
+type Rules = [Rule]
 data Rule = Rule
     { header  :: String
     , pattern :: [Pattern]

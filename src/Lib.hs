@@ -3,7 +3,8 @@ module Lib
     ( parseMaybe
     , periodParser
     , Period
-    , Transaction
+    , Transaction(..)
+    , Transactions
     , fromPBZ
     , printTransaction
     ) where
@@ -81,7 +82,7 @@ parseMaybe parser input =
         [] -> Nothing
         ((result, _):_) -> Just result
 
-
+type Transactions = [Transaction]
 data Transaction = Transaction
     { id          :: String
     , date        :: Day

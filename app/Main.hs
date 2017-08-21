@@ -2,11 +2,14 @@
 module Main where
 
 import Lib
+import Rules
 import PBZ
 
 import Data.String
+import Text.Regex.PCRE
 
 import Data.Time
+import Data.Maybe
 import Data.Time.Format
 import Data.Tuple
 import Control.Monad
@@ -48,7 +51,7 @@ main = run =<< execParser opts
         opts = info (parseOptions <**> helper)
             ( fullDesc
            <> progDesc "Fetch transaction data and convert it to ledger transactions."
-           <> header "bankfetcher - a bank transaction fetcher"
+           <> Options.Applicative.header "bankfetcher - a bank transaction fetcher"
             )
 
 withInfo :: Parser a -> String -> ParserInfo a
@@ -76,6 +79,36 @@ parseCommand = subparser $
 parseOptions :: Parser Options
 parseOptions = Options <$> parseCommand
 
+day :: Day
+day = fromGregorian 2017 20 1
+trans = Transaction "PBZ-1495678335" day "PBZ ATM KONZUM BELI MANASTIR" (Just 100.00) Nothing "HRK"
+paty = Pattern Description Matches ["PBZ ATM*"]
+acy  = Action Set Description "Test"
+ruly = [Rule "Test" [paty] [acy]]
+
+patternMatches :: Transaction -> Pattern -> Bool
+patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = any (obj ==) args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args)         = any (obj ==) args
+patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Matches args) = any (obj =~) args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args)    = any (obj =~) args
+
+ruleMatches :: Transaction -> Rule -> Bool
+ruleMatches t (Rule h p a) = all (patternMatches t) p
+
+executeAction :: Transaction -> Action -> Transaction
+executeAction t (Action Set Description arg) = t { description = arg }
+executeAction t (Action Set Currency arg)    = t { currency    = arg }
+
+findMatchingRule :: Rules -> Transaction -> Maybe Rule
+findMatchingRule rs t = listToMaybe $ filter (ruleMatches t) rs
+
+transformTransaction :: Rules -> Transaction -> Transaction
+transformTransaction rs t = foldl executeAction t a
+    where (Rule h p a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
+
+transformTransactions :: Rules -> Transactions -> Transactions
+transformTransactions r t = map (transformTransaction r) t
+
 run :: Options -> IO ()
 run (Options cmd) = do
     case cmd of
@@ -85,4 +118,5 @@ run (Options cmd) = do
             Nothing   -> undefined
             Just file -> do
                 inputData <- getJSON file
-                mapM_ printTransaction $ fromPBZ inputData
+                let outputData = transformTransactions ruly (fromPBZ inputData)
+                mapM_ printTransaction outputData
