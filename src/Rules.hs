@@ -9,11 +9,13 @@ module Rules
     , ActionVerbs(..)
     , parseRules
     , testrule
+    , parseRulesFile
     )
     where
 
 import Control.Applicative (empty)
 import Control.Monad (void)
+import Control.Monad.IO.Class
 import Data.Void
 import Data.Char
 import Text.Megaparsec
@@ -123,5 +125,7 @@ parseRule = do
     actionLines <- some parseActionLine
     return $ Rule name patternLines actionLines
 
-parseRules :: Parser [Rule]
+parseRules :: Parser Rules
 parseRules = many parseRule <* eof
+
+parseRulesFile file = parse parseRules file <$> readFile file

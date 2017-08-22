@@ -5,6 +5,7 @@ import Lib
 import Rules
 import PBZ
 
+import System.Exit
 import Data.String
 import Text.Regex.PCRE
 
@@ -16,6 +17,7 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Debug.Trace
 
+import Text.Megaparsec.Error
 import Options.Applicative
 import Control.Applicative
 import Data.Semigroup ((<>))
@@ -109,8 +111,17 @@ transformTransaction rs t = foldl executeAction t a
 transformTransactions :: Rules -> Transactions -> Transactions
 transformTransactions r t = map (transformTransaction r) t
 
+getRules :: FilePath -> IO Rules
+getRules f = do
+    eitherRule <- parseRulesFile f
+    case eitherRule of
+      Left err -> die (parseErrorPretty err)
+      Right rs -> return rs
+
 run :: Options -> IO ()
 run (Options cmd) = do
+    rs <- getRules "doc/examples/rationalis.rules"
+
     case cmd of
       Fetch period -> print =<< fetchPBZ period
       Convert file ->
@@ -118,5 +129,5 @@ run (Options cmd) = do
             Nothing   -> undefined
             Just file -> do
                 inputData <- getJSON file
-                let outputData = transformTransactions ruly (fromPBZ inputData)
+                let outputData = transformTransactions rs (fromPBZ inputData)
                 mapM_ printTransaction outputData
