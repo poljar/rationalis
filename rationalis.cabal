@@ -43,8 +43,11 @@ executable rationalis
                      , time
                      , lens
                      , aeson
+                     , filepath
+                     , directory
                      , regex-pcre
                      , megaparsec
+                     , ConfigFile
                      , optparse-applicative
                      , rationalis
   default-language:    Haskell2010
