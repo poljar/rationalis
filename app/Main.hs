@@ -18,11 +18,6 @@ import System.FilePath
 
 import Text.Megaparsec.Error (parseErrorPretty)
 
-import qualified Data.ByteString.Lazy as B
-
-getJSON :: FilePath -> IO B.ByteString
-getJSON jsonFile = B.readFile jsonFile
-
 getRules :: FilePath -> IO Rules
 getRules f = do
     eitherRule <- parseRulesFile f

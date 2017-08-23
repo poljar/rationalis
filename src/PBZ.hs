@@ -1,20 +1,50 @@
 {-# LANGUAGE OverloadedStrings #-}
 module PBZ
     ( fetchPBZ
+    , fromPBZ
     ) where
 
 import Lib
 
+import Data.Time
+import Data.Time.Clock
+import Data.Time.Calendar
+
+import Data.Aeson.Lens
+import Data.Scientific
+
 import System.IO
-import Text.StringLike
 import Control.Lens
+import Text.StringLike
 import Text.HTML.TagSoup hiding (parseOptions)
 import Network.Wreq hiding (Options)
 import Network.HTTP.Client hiding (responseBody)
 import Network.HTTP.Client.TLS
 
+import qualified Data.Text as T
+import qualified Text.HTML.TagSoup as TS
 import qualified Network.Wreq.Session as S
 import qualified Data.ByteString.Lazy as B
+
+fromPBZDate :: T.Text -> Day
+fromPBZDate s = parseTimeOrError True defaultTimeLocale "%d.%m.%Y. %T" $ T.unpack s
+
+decodeHTMLentities :: String -> String
+decodeHTMLentities s = TS.fromTagText $ head $ TS.parseTags s
+
+-- TODO ^?! aborts if it can't get the value
+fromPBZ :: Data.Aeson.Lens.AsValue s => s -> [Transaction]
+fromPBZ jsonData = jsonData ^.. members . key "result" . members .
+    key "bankAccountTransactionList" . _Array .
+    traverse . to (\t -> Transaction
+        ( "PBZ-" ++ (t ^?! key "transactionNumber" . _String & T.unpack))
+        ( t ^?! key "currencyDate" . _String & fromPBZDate)
+        ( t ^?! key "description" . _String & T.unpack & decodeHTMLentities)
+        ( t ^?  key "payAmount" . key "amount" . _Number & fmap toRealFloat)
+        ( t ^?  key "receiveAmount" . key "amount" . _Number & fmap toRealFloat)
+        ( t ^?! key "amountAfterTransaction" . key "currency" .
+                key "currencyCode" . _String & T.unpack)
+        )
 
 getCsrf :: (Show str, StringLike str) => Response str -> str
 getCsrf r = fromAttrib "content" $ head $
