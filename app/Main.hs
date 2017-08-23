@@ -26,7 +26,7 @@ getRules f = do
       Right rs -> return rs
 
 -- TODO there has to be a better way to do this.
-tryGetRules :: FilePath -> IO [Rule]
+tryGetRules :: FilePath -> IO Rules
 tryGetRules file = do
     ret <- try $ getRules file :: IO (Either IOException Rules)
     case ret of
