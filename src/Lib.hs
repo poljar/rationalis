@@ -7,7 +7,10 @@ module Lib
     , Transactions
     , fromPBZ
     , printTransaction
+    , transformTransactions
     ) where
+
+import Rules
 
 import Data.Maybe
 import Data.Aeson.Lens
@@ -16,6 +19,7 @@ import Data.Scientific
 import Data.Time
 import Data.Time.Clock
 import Data.Time.Calendar
+import Text.Regex.PCRE
 
 import Text.Printf
 import Control.Lens
@@ -136,3 +140,26 @@ fromPBZ jsonData = jsonData ^.. members . key "result" . members .
         ( t ^?! key "amountAfterTransaction" . key "currency" .
                 key "currencyCode" . _String & T.unpack)
         )
+
+patternMatches :: Transaction -> Pattern -> Bool
+patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = any (obj ==) args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args)         = any (obj ==) args
+patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Matches args) = any (obj =~) args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args)    = any (obj =~) args
+
+ruleMatches :: Transaction -> Rule -> Bool
+ruleMatches t (Rule h p a) = all (patternMatches t) p
+
+executeAction :: Transaction -> Action -> Transaction
+executeAction t (Action Set Description arg) = t { description = arg }
+executeAction t (Action Set Currency arg)    = t { currency    = arg }
+
+findMatchingRule :: Rules -> Transaction -> Maybe Rule
+findMatchingRule rs t = listToMaybe $ filter (ruleMatches t) rs
+
+transformTransaction :: Rules -> Transaction -> Transaction
+transformTransaction rs t = foldl executeAction t a
+    where (Rule h p a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
+
+transformTransactions :: Rules -> Transactions -> Transactions
+transformTransactions r t = map (transformTransaction r) t

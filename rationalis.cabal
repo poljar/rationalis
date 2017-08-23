@@ -27,6 +27,7 @@ library
                      , bytestring
                      , lens-aeson
                      , megaparsec
+                     , regex-pcre
                      , tagsoup
                      , http-client
                      , http-client-tls
@@ -46,7 +47,6 @@ executable rationalis
                      , aeson
                      , filepath
                      , directory
-                     , regex-pcre
                      , megaparsec
                      , ConfigFile
                      , optparse-applicative

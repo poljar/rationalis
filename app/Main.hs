@@ -9,7 +9,6 @@ import Argparse
 
 import Control.Exception
 
-import Data.Time
 import Data.Maybe
 import Data.ConfigFile (CPError)
 
@@ -17,39 +16,12 @@ import System.Exit
 import System.Directory
 import System.FilePath
 
-import Text.Regex.PCRE
-import Text.Megaparsec.Error
+import Text.Megaparsec.Error (parseErrorPretty)
 
 import qualified Data.ByteString.Lazy as B
 
 getJSON :: FilePath -> IO B.ByteString
 getJSON jsonFile = B.readFile jsonFile
-
-main :: IO ()
-main = run =<< execArgparse
-
-patternMatches :: Transaction -> Pattern -> Bool
-patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = any (obj ==) args
-patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args)         = any (obj ==) args
-patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Matches args) = any (obj =~) args
-patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args)    = any (obj =~) args
-
-ruleMatches :: Transaction -> Rule -> Bool
-ruleMatches t (Rule h p a) = all (patternMatches t) p
-
-executeAction :: Transaction -> Action -> Transaction
-executeAction t (Action Set Description arg) = t { description = arg }
-executeAction t (Action Set Currency arg)    = t { currency    = arg }
-
-findMatchingRule :: Rules -> Transaction -> Maybe Rule
-findMatchingRule rs t = listToMaybe $ filter (ruleMatches t) rs
-
-transformTransaction :: Rules -> Transaction -> Transaction
-transformTransaction rs t = foldl executeAction t a
-    where (Rule h p a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
-
-transformTransactions :: Rules -> Transactions -> Transactions
-transformTransactions r t = map (transformTransaction r) t
 
 getRules :: FilePath -> IO Rules
 getRules f = do
@@ -106,3 +78,6 @@ run (Options globOpts cmd) = do
     case cmd of
       Fetch period -> print =<< fetchPBZ period
       Convert file -> runConvert file rules
+
+main :: IO ()
+main = run =<< execArgparse
