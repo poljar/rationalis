@@ -22,7 +22,7 @@ import qualified Text.ParserCombinators.ReadP as RP
 
 data Command
     = Fetch Period
-    | Convert (Maybe FilePath)
+  | Convert (Maybe FilePath) (Maybe FilePath)
 
 data GlobalOptions = GlobalOptions
     { confPath :: Maybe FilePath
@@ -118,7 +118,13 @@ parseConvert = Convert <$>
     <> metavar "INFILE"
     <> help "Input file to convert."
     )
-
+    <*>
+    ( optional $ strOption $
+       long  "output-file"
+    <> short 'o'
+    <> metavar "OUTFILE"
+    <> help "Output file to use."
+    )
 parseCommand :: Parser Command
 parseCommand = subparser $
         command "fetch"     (parseFetch   `withInfo`

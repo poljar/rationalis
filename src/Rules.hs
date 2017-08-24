@@ -34,6 +34,8 @@ data Rule = Rule
     , action  :: [Action]
     } deriving (Show)
 
+-- TODO the arguments could be a compiled regex, so we can type check regex
+-- strings
 data Pattern     = Pattern
     { matchObject :: Objects
     , matchVerb   :: MatchVerbs

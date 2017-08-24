@@ -16,6 +16,8 @@ import Data.Maybe
 import Control.Lens
 import Control.Applicative
 
+import System.IO
+
 import Text.Printf
 import Text.Regex.PCRE
 
@@ -57,8 +59,9 @@ transformTransaction rs t = foldl executeAction t a
 transformTransactions :: Rules -> Transactions -> Transactions
 transformTransactions r t = map (transformTransaction r) t
 
-getJSON :: FilePath -> IO B.ByteString
-getJSON jsonFile = B.readFile jsonFile
+getJSON :: Maybe FilePath -> IO B.ByteString
+getJSON (Just file) = B.readFile file
+getJSON Nothing     = B.hGetContents stdin
 
 -- TODO indentation should be based on the lengths of the payer/payee accounts
 -- some pretty printing lib pretty please?

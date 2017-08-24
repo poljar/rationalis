@@ -53,15 +53,12 @@ fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do
         Just f  -> return f
     return (confFile, ruleFile)
 
-runConvert :: Maybe FilePath -> Rules -> IO ()
-runConvert file rules = do
-    case file of
-        Nothing -> undefined
-
-        Just file -> do
-            inputData <- getJSON file
-            let outputData = transformTransactions rules (fromPBZ inputData)
-            mapM_ printTransaction outputData
+-- TODO handle outFile
+runConvert :: Maybe FilePath -> Maybe FilePath -> Rules -> IO ()
+runConvert inFile outFile rules = do
+    inputData <- getJSON inFile
+    let outputData = transformTransactions rules (fromPBZ inputData)
+    mapM_ printTransaction outputData
 
 run :: Options -> IO ()
 run (Options globOpts cmd) = do
@@ -72,7 +69,7 @@ run (Options globOpts cmd) = do
 
     case cmd of
       Fetch period -> print =<< fetchPBZ period
-      Convert file -> runConvert file rules
+      Convert inFile outFile -> runConvert inFile outFile rules
 
 main :: IO ()
 main = run =<< execArgparse

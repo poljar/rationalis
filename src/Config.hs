@@ -13,6 +13,7 @@ import Control.Monad.Except
 
 data Config = Config
     { accounts  :: Accounts
+--  , output-format? :: OutFormat
     } deriving (Show)
 
 type Accounts = [Account]
