@@ -22,6 +22,7 @@ library
                      , text
                      , lens
                      , wreq
+                     , aeson
                      , pretty
                      , tagsoup
                      , scientific

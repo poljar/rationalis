@@ -139,6 +139,7 @@ parseOptions = Options <$>
     <*> parseRulePath)
     <*> parseCommand
 
+-- TODO this should fail if the supplied path is invalid.
 parseConfPath :: Parser (Maybe FilePath)
 parseConfPath =
     ( optional $ strOption $

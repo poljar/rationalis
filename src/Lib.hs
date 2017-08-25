@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 module Lib
     ( Period
     , Transaction(..)
@@ -12,9 +13,12 @@ import Rules
 
 import Data.Time
 import Data.Maybe
+import Data.Aeson
 
 import Control.Lens
 import Control.Applicative
+
+import GHC.Generics
 
 import System.IO
 
@@ -36,7 +40,10 @@ data Transaction = Transaction
     , payAmount   :: Maybe Float
     , recAmount   :: Maybe Float
     , currency    :: String
-    } deriving (Show)
+    } deriving (Generic, Show)
+
+instance ToJSON Transaction
+instance FromJSON Transaction
 
 -- TODO pay and rec don't necessarily have to be in the same currency
 -- TODO the accounts should be part of the transaction

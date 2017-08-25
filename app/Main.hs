@@ -11,6 +11,7 @@ import Control.Exception
 
 import Data.List
 import Data.Maybe
+import Data.Aeson
 import Data.ConfigFile (CPError)
 
 import System.Exit
@@ -60,9 +61,11 @@ writeTransactions (Just f) ts = writeFile f $ intercalate "\n" $ renderPrettyTra
 
 runConvert :: Maybe FilePath -> Maybe FilePath -> Rules -> IO ()
 runConvert inFile outFile rules = do
-    inputData <- getJSON inFile
-    let ts = transformTransactions rules (fromPBZ inputData)
-    writeTransactions outFile ts
+    inputData <- decode <$> getJSON inFile
+
+    case inputData of
+        Just i  -> writeTransactions outFile $ transformTransactions rules i
+        Nothing -> die "Error: Unable to parse input file."
 
 run :: Options -> IO ()
 run (Options globOpts cmd) = do
