@@ -9,7 +9,6 @@ import Argparse
 
 import Control.Exception
 
-import Data.List
 import Data.Maybe
 import Data.Aeson
 import Data.ConfigFile (CPError)
@@ -56,15 +55,15 @@ fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do
     return (confFile, ruleFile)
 
 writeTransactions :: Maybe FilePath -> Transactions -> IO ()
-writeTransactions Nothing ts  = putStrLn $ intercalate "\n\n"  $ renderPrettyTransactions ts
-writeTransactions (Just f) ts = writeFile f $ intercalate "\n" $ renderPrettyTransactions ts
+writeTransactions Nothing ts  = putStrLn $ renderPrettyTransactions ts
+writeTransactions (Just f) ts = writeFile f $ renderPrettyTransactions ts
 
 runConvert :: Maybe FilePath -> Maybe FilePath -> Rules -> IO ()
 runConvert inFile outFile rules = do
     inputData <- decode <$> getJSON inFile
 
     case inputData of
-        Just i  -> writeTransactions outFile $ transformTransactions rules i
+        Just ts -> writeTransactions outFile $ transformTransactions rules ts
         Nothing -> die "Error: Unable to parse input file."
 
 run :: Options -> IO ()

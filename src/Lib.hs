@@ -11,6 +11,7 @@ module Lib
 
 import Rules
 
+import Data.List
 import Data.Time
 import Data.Maybe
 import Data.Aeson
@@ -51,26 +52,25 @@ instance FromJSON Transaction
 instance Pretty Transaction where
     pPrint (Transaction id date description payAmount recAmount currency) =
         d <+> char '*' <+> desc
-            $$ (nest 4 $ targetAcc <+> pay <+> cur <+> semi <+> i)
-            $$ (nest 4 $ sourceAcc <+> rec <+> cur)
+            $$ (nest ident $ targetAcc <+> pay <+> cur <+> semi <+> i)
+            $$ (nest ident $ sourceAcc <+> rec <+> cur)
             where
+                ident     = 4
                 i         = text id
                 d         = text $ formatTime defaultTimeLocale "%Y/%m/%d" date
                 desc      = text description
                 pay       = prettyFloat $ fromMaybe 0.00 payAmount
                 rec       = prettyFloat $ fromMaybe 0.00 recAmount
                 cur       = text currency
-                sourceAcc = text $ printf "%-30s" ("Assets:PBZ"   :: String)
-                targetAcc = text $ printf "%-30s" ("Expenses:???" :: String)
+                sourceAcc = text $ printf accFormat ("Assets:PBZ"   :: String)
+                targetAcc = text $ printf accFormat ("Expenses:???" :: String)
+                accFormat = "%-30s"
 
 prettyFloat :: Float -> Doc
 prettyFloat f = text $ printf "%10.2f" f
 
-renderPrettyTransaction :: Transaction -> String
-renderPrettyTransaction t = prettyShow t
-
-renderPrettyTransactions :: Transactions -> [String]
-renderPrettyTransactions ts = map renderPrettyTransaction ts
+renderPrettyTransactions :: Transactions -> String
+renderPrettyTransactions ts = intercalate "\n\n" $ map prettyShow ts
 
 patternMatches :: Transaction -> Pattern -> Bool
 patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = any (obj ==) args
