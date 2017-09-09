@@ -51,6 +51,7 @@ executable rationalis
                      , directory
                      , megaparsec
                      , ConfigFile
+                     , typed-process
                      , optparse-applicative
                      , rationalis
   default-language:    Haskell2010

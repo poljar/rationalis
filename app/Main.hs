@@ -16,6 +16,7 @@ import Data.ConfigFile (CPError)
 import System.Exit
 import System.Directory
 import System.FilePath
+import System.Process.Typed
 
 import Text.Megaparsec.Error (parseErrorPretty)
 
@@ -78,6 +79,9 @@ runConvert inFile outFile rules = do
         Just ts -> writeTransactions outFile $ transformTransactions rules ts
         Nothing -> die "Error: Unable to parse input file."
 
+runFetch :: FetchOptions -> Config -> IO ()
+runFetch (FetchOptions period file pass) conf = runProcess "true" >>= print
+
 run :: Options -> IO ()
 run (Options globOpts cmd) = do
     (confFile, ruleFile) <- fromMaybeGlobalOpts globOpts
@@ -86,8 +90,8 @@ run (Options globOpts cmd) = do
     rules   <- tryGetRules ruleFile
 
     case cmd of
-      Fetch period -> print =<< fetchPBZ period
-      Convert inFile outFile -> runConvert inFile outFile rules
+      Fetch fetchOpts         -> runFetch fetchOpts conf
+      Convert inFile outFile  -> runConvert inFile outFile rules
 
 main :: IO ()
 main = run =<< execArgparse

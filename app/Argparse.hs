@@ -3,6 +3,8 @@ module Argparse
     ( execArgparse
     , parseMaybe
     , periodParser
+    , Password
+    , FetchOptions(..)
     , Options(..)
     , GlobalOptions(..)
     , Command(..)
@@ -17,9 +19,17 @@ import Data.Semigroup ((<>))
 
 import qualified Text.ParserCombinators.ReadP as RP
 
+type Password = String
+
 data Command
-    = Fetch (Maybe Period)
+    = Fetch FetchOptions
   | Convert (Maybe FilePath) (Maybe FilePath)
+
+data FetchOptions = FetchOptions 
+    { period   :: Maybe Period
+    , outFile  :: Maybe FilePath
+    , password :: Maybe Password
+    }
 
 data GlobalOptions = GlobalOptions
     { confPath :: Maybe FilePath
@@ -104,8 +114,24 @@ periodOption = optional $ option periodReader
 withInfo :: Parser a -> String -> ParserInfo a
 withInfo opts desc = info (helper <*> opts) $ progDesc desc
 
-parseFetch :: Parser Command
-parseFetch = Fetch <$> periodOption
+parseOutFile :: Parser (Maybe FilePath)
+parseOutFile = optional $ strOption $
+       long  "output-file"
+    <> short 'o'
+    <> metavar "OUTFILE"
+    <> help "Output file to use."
+
+parsePassword :: Parser (Maybe String)
+parsePassword = optional $ strOption $
+       long    "password"
+    <> short   'P'
+    <> metavar "PASSWORD"
+    <> help    "Password to pass to the fetcher."
+
+parseFetchOpts = FetchOptions <$> periodOption <*> parseOutFile <*> parsePassword
+--parseFetch :: Parser Command
+--
+parseFetch = Fetch <$> parseFetchOpts
 
 parseConvert :: Parser Command
 parseConvert = Convert <$>
@@ -115,13 +141,8 @@ parseConvert = Convert <$>
     <> metavar "INFILE"
     <> help "Input file to convert."
     )
-    <*>
-    ( optional $ strOption $
-       long  "output-file"
-    <> short 'o'
-    <> metavar "OUTFILE"
-    <> help "Output file to use."
-    )
+    <*> parseOutFile
+
 parseCommand :: Parser Command
 parseCommand = subparser $
         command "fetch"     (parseFetch   `withInfo`
