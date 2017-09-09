@@ -10,12 +10,7 @@ module Argparse
 import Lib
 
 import Data.Time
-import Data.Time.Clock
-import Data.Time.Calendar
-import Data.Maybe
-import Data.Time.Format
 import Options.Applicative
-import Control.Applicative
 import Data.Semigroup ((<>))
 
 import qualified Text.ParserCombinators.ReadP as RP

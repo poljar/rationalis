@@ -9,7 +9,6 @@ import Argparse
 
 import Control.Exception
 
-import Data.Maybe
 import Data.Aeson
 import Data.ConfigFile (CPError)
 
@@ -31,14 +30,14 @@ tryGetRules :: FilePath -> IO Rules
 tryGetRules file = do
     ret <- try $ getRules file :: IO (Either IOException Rules)
     case ret of
-      Left err -> return []
+      Left _ -> return []
       Right as -> return as
 
 tryGetConf :: FilePath -> IO (Maybe (Either CPError Config))
 tryGetConf file = do
     ret <- try $ readConf file :: IO (Either IOException (Either CPError Config))
     case ret of
-      Left err -> return Nothing
+      Left _ -> return Nothing
       Right cp -> return (Just cp)
 
 checkFile :: FilePath -> IO FilePath
