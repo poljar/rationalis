@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import Lib
@@ -25,20 +26,25 @@ getRules f = do
       Left err -> die (parseErrorPretty err)
       Right rs -> return rs
 
--- TODO there has to be a better way to do this.
-tryGetRules :: FilePath -> IO Rules
-tryGetRules file = do
-    ret <- try $ getRules file :: IO (Either IOException Rules)
-    case ret of
-      Left _ -> return []
-      Right as -> return as
+getConf :: FilePath -> IO Config
+getConf f = do
+    eitherConf <- readConf f
+    case eitherConf of
+      Left err   -> die $ "Error parsing conf: " ++ (show err)
+      Right conf -> return conf
 
-tryGetConf :: FilePath -> IO (Maybe (Either CPError Config))
-tryGetConf file = do
-    ret <- try $ readConf file :: IO (Either IOException (Either CPError Config))
+tryGetFile :: forall t. (Monoid t) => FilePath -> (FilePath -> IO t) -> IO t
+tryGetFile f fileReader = do
+    ret <- try $ fileReader f :: IO (Either IOException t)
     case ret of
-      Left _ -> return Nothing
-      Right cp -> return (Just cp)
+      Left _ -> mempty
+      Right value -> return value
+
+tryGetRules :: FilePath -> IO Rules
+tryGetRules file = tryGetFile file getRules
+
+tryGetConf :: FilePath -> IO Config
+tryGetConf file = tryGetFile file getConf
 
 checkFile :: FilePath -> IO FilePath
 checkFile f = do

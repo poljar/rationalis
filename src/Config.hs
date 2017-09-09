@@ -16,6 +16,10 @@ data Config = Config
 --  , output-format? :: OutFormat
     } deriving (Show)
 
+instance Monoid Config where
+    mempty = Config []
+    mappend (Config a) (Config b) = Config (a ++ b)
+
 type Accounts = [Account]
 
 data Account = Account
