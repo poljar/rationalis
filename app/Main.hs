@@ -20,19 +20,21 @@ import System.Process.Typed
 
 import Text.Megaparsec.Error (parseErrorPretty)
 
+getFile :: FilePath -> (FilePath -> IO (Either t b)) -> (t -> String) -> IO b
+getFile f reader errorPrinter = do
+    ret <- reader f
+    case ret of
+      Left err -> die $ errorPrinter err
+      Right val -> return val
+
 getRules :: FilePath -> IO Rules
-getRules f = do
-    eitherRule <- parseRulesFile f
-    case eitherRule of
-      Left err -> die (parseErrorPretty err)
-      Right rs -> return rs
+getRules f = getFile f parseRulesFile parseErrorPretty
+
+-- TODO better error messages
+confErrorPretty err = "Error parsing conf: " ++ (show err)
 
 getConf :: FilePath -> IO Config
-getConf f = do
-    eitherConf <- readConf f
-    case eitherConf of
-      Left err   -> die $ "Error parsing conf: " ++ (show err)
-      Right conf -> return conf
+getConf f = getFile f readConf confErrorPretty
 
 tryGetFile :: forall t. (Monoid t) => FilePath -> (FilePath -> IO t) -> IO t
 tryGetFile f fileReader = do
