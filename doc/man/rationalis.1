@@ -1,23 +1,30 @@
 .Dd July 24, 2017
 .Dt RATIONALIS 1
 .Os
+.\" ---------------------------------------------------------------------------
 .Sh NAME
 .Nm rationalis
 .Nd Automatic accounting command-line tool
+.\" ---------------------------------------------------------------------------
 .Sh SYNOPSIS
 .Nm
 .Cm convert
-.Op Fl i Ar file
-.Op Fl o Ar file
+.Op Fl c Ar config-file
+.Op Fl r Ar rules-file
+.Op Fl i Ar input-file
+.Op Fl o Ar output-file
 .Nm
-.Cm fetch
-.Ar account
-.Op Fl o Ar file
-.Fl p Ar period
+.Cm fetch Ar account
+.Op Fl c Ar config-file
+.Op Fl r Ar rules-file
+.Op Fl o Ar output-file
+.Op Fl p Ar period
 .Op Fl P Ar password
 .Nm
-.Cm pull
-TODO
+.Cm pull Ar account
+.Op Fl c Ar config-file
+.Op Fl r Ar rules-file
+.\" ---------------------------------------------------------------------------
 .Sh DESCRIPTION
 Accounting is boring, let a
 .Nm
@@ -39,11 +46,11 @@ Convert transactions to the
 The command line flags to change the behaviour of the command
 are as follows:
 .Bl -tag -width Ds
-.It Fl o,--output-file Ar file
+.It Fl o , Fl -output-file Ar file
 Specify an output
 .Ar file ,
 if the flag is not provided stdout is used.
-.It Fl i,--input-file Ar file
+.It Fl i , Fl -input-file Ar file
 Specify an input
 .Ar file ,
 if the flag is not provided stdin is used.
@@ -54,14 +61,14 @@ Fetch transaction data from a configured
 and print them out.
 The command line flags to change the behaviour of the command:
 .Bl -tag -width Ds
-.It Fl o,--output-file Ar file
+.It Fl o , Fl -output-file Ar file
 Specify an output
 .Ar file ,
 if the flag is not provided stdout is used.
-.It Fl p,--period Ar time-period
+.It Fl p , Fl -period Ar time-period
 Fetch transactions only for the given
 .Ar time-period .
-.It Fl P,--password Ar password
+.It Fl P , Fl -password Ar password
 Provide the
 .Ar password
 on the command line instead of asking for it.
@@ -69,6 +76,7 @@ on the command line instead of asking for it.
 .It Cm pull
 TODO
 .El
+.\" ---------------------------------------------------------------------------
 .Sh FILES
 .Bl -tag -width 34 -compact
 .It Pa $XDG_CONFIG_HOME/rationalis/config
@@ -77,12 +85,15 @@ Default location of the configuration file.
 .It Pa $XDG_CONFIG_HOME/rationalis/rules
 Default location of the rules file.
 .El
+.\" ---------------------------------------------------------------------------
 .Sh EXIT STATUS
 .Ex -std
+.\" ---------------------------------------------------------------------------
 .Sh SEE ALSO
 .Xr ledger 1 ,
 .Xr rationalis 5 ,
 .Xr rationalis.rules 5
+.\" ---------------------------------------------------------------------------
 .Sh AUTHORS
 .Nm
 was written by
