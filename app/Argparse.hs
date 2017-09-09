@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Argparse
     ( execArgparse
+    , parseMaybe
+    , periodParser
     , Options(..)
     , GlobalOptions(..)
     , Command(..)
