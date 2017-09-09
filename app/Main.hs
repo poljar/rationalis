@@ -41,17 +41,24 @@ tryGetConf file = do
       Left err -> return Nothing
       Right cp -> return (Just cp)
 
+checkFile :: FilePath -> IO FilePath
+checkFile f = do
+    exists <- doesFileExist f
+    case exists of
+      True -> return f
+      False -> die $ "No such file: " ++ (show f)
+
 fromMaybeGlobalOpts :: GlobalOptions -> IO (FilePath, FilePath)
 fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do
     confDir <- getXdgDirectory XdgConfig "rationalis"
 
     confFile <- case mConfFile of
         Nothing -> return (joinPath [confDir, "rationalis.conf"])
-        Just f  -> return f
+        Just f  -> checkFile f
 
     ruleFile <- case mRuleFile of
         Nothing -> return (joinPath [confDir, "rationalis.rules"])
-        Just f  -> return f
+        Just f  -> checkFile f
     return (confFile, ruleFile)
 
 writeTransactions :: Maybe FilePath -> Transactions -> IO ()
