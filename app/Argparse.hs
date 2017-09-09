@@ -18,7 +18,7 @@ import Data.Semigroup ((<>))
 import qualified Text.ParserCombinators.ReadP as RP
 
 data Command
-    = Fetch Period
+    = Fetch (Maybe Period)
   | Convert (Maybe FilePath) (Maybe FilePath)
 
 data GlobalOptions = GlobalOptions
@@ -87,14 +87,14 @@ parseMaybe parser input =
         ((result, _):_) -> Just result
 
 
-periodReader :: ReadM (Period)
+periodReader :: ReadM Period
 periodReader = eitherReader $ \arg ->
     case parseMaybe periodParser arg of
         Nothing -> Left ("Cannot parse date: " ++ arg)
         Just period -> Right period
 
-periodOption :: Parser Period
-periodOption = option periodReader
+periodOption :: Parser (Maybe Period)
+periodOption = optional $ option periodReader
               ( long "period"
                  <> short 'p'
                  <> metavar "PERIOD"
