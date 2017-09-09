@@ -7,8 +7,6 @@ module PBZ
 import Lib
 
 import Data.Time
-import Data.Time.Clock
-import Data.Time.Calendar
 
 import Data.Aeson.Lens
 import Data.Scientific
@@ -18,8 +16,6 @@ import Control.Lens
 import Text.StringLike
 import Text.HTML.TagSoup hiding (parseOptions)
 import Network.Wreq hiding (Options)
-import Network.HTTP.Client hiding (responseBody)
-import Network.HTTP.Client.TLS
 
 import qualified Data.Text as T
 import qualified Text.HTML.TagSoup as TS
@@ -33,7 +29,7 @@ decodeHTMLentities :: String -> String
 decodeHTMLentities s = TS.fromTagText $ head $ TS.parseTags s
 
 -- TODO ^?! aborts if it can't get the value
-fromPBZ :: Data.Aeson.Lens.AsValue s => s -> [Transaction]
+fromPBZ :: Data.Aeson.Lens.AsValue s => s -> Transactions
 fromPBZ jsonData = jsonData ^.. members . key "result" . members .
     key "bankAccountTransactionList" . _Array .
     traverse . to (\t -> Transaction
@@ -88,14 +84,14 @@ fetchPBZ period = S.withSession $ \sess -> do
                             & header "Content-Type"    .~ ["application/x-www-form-urlencoded"]
                             & header "Referer"         .~ ["https://net.pbz.hr/pbz365/logonForm.htm"]
 
-    let login_data = [ "locale"             := ( "hr" :: String )
+    let login_data = [ "locale"             := ( "hr"         :: String )
                      , "serviceCode"        := ( "PBZ365@NET" :: String )
-                     , "authenticationType" := ( "CAP" :: String )
-                     , "submitButton"       := ( "Potvrda" :: String )
-                     , "validUntil"         := ( "" :: String )
-                     , "pan"                := ( pan :: String )
-                     , "otp"                := ( otp :: String )
-                     , "_csfr"              := ( csrf :: String )
+                     , "authenticationType" := ( "CAP"        :: String )
+                     , "submitButton"       := ( "Potvrda"    :: String )
+                     , "validUntil"         := ( ""           :: String )
+                     , "pan"                := ( pan          :: String )
+                     , "otp"                := ( otp          :: String )
+                     , "_csfr"              := ( csrf         :: String )
                      ]
 --        r <- S.postWith postOpts sess "https://net.pbz.hr/pbz365/app/logon" login_data
 --        r <- S.postWith postOpts sess "https://httpbin.org/post" login_data

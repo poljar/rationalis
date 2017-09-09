@@ -15,11 +15,8 @@ module Rules
 
 import Control.Applicative (empty)
 import Control.Monad (void)
-import Control.Monad.IO.Class
-import Data.Void
 import Data.Char
 import Text.Megaparsec
-import Text.Megaparsec.Char
 import Text.Megaparsec.String
 
 import qualified Text.Megaparsec.Lexer as L

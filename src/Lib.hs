@@ -16,9 +16,6 @@ import Data.Time
 import Data.Maybe
 import Data.Aeson
 
-import Control.Lens
-import Control.Applicative
-
 import GHC.Generics
 
 import System.IO
@@ -79,7 +76,7 @@ patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Matches args) = 
 patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args)    = any (obj =~) args
 
 ruleMatches :: Transaction -> Rule -> Bool
-ruleMatches t (Rule h p a) = all (patternMatches t) p
+ruleMatches t (Rule _ p _) = all (patternMatches t) p
 
 executeAction :: Transaction -> Action -> Transaction
 executeAction t (Action Set Description arg) = t { description = arg }
@@ -90,7 +87,7 @@ findMatchingRule rs t = listToMaybe $ filter (ruleMatches t) rs
 
 transformTransaction :: Rules -> Transaction -> Transaction
 transformTransaction rs t = foldl executeAction t a
-    where (Rule h p a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
+    where (Rule _ _ a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
 
 transformTransactions :: Rules -> Transactions -> Transactions
 transformTransactions r t = map (transformTransaction r) t

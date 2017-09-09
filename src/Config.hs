@@ -40,6 +40,6 @@ readConf file = do
     rv <- runExceptT $ do
         cp <- join $ liftIO $ readfile emptyCP file
         let s = sections cp
-        a <- mapM (readAccount cp) s
+        a <- readAccounts cp s
         return (Config a)
     return rv
