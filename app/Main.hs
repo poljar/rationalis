@@ -44,9 +44,7 @@ tryGetConf file = tryGetFile file getConf
 checkFile :: FilePath -> IO FilePath
 checkFile f = do
     exists <- doesFileExist f
-    case exists of
-      True -> return f
-      False -> die $ "No such file: " ++ (show f)
+    if exists then return f else die $ "No such file: " ++ show f
 
 fromMaybeGlobalOpts :: GlobalOptions -> IO (FilePath, FilePath)
 fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do

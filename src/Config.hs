@@ -13,7 +13,7 @@ module Config
 import Data.ConfigFile
 import Control.Monad.Except
 
-data Config = Config
+newtype Config = Config
     { accounts  :: Accounts
 --  , output-format? :: OutFormat
     } deriving (Show)
@@ -39,16 +39,14 @@ readAccount cp s = do
     return (Account s f u o)
 
 readAccounts :: MonadError CPError m => ConfigParser -> [SectionSpec] -> m Accounts
-readAccounts cp s = mapM (readAccount cp) s
+readAccounts cp = mapM (readAccount cp)
 
 -- TODO better error messages
-confErrorPretty err = "Error parsing conf: " ++ (show err)
+confErrorPretty err = "Error parsing conf: " ++ show err
 
 readConf :: MonadIO m => FilePath -> m (Either CPError Config)
-readConf file = do
-    rv <- runExceptT $ do
+readConf file = runExceptT $ do
         cp <- join $ liftIO $ readfile emptyCP file
         let s = sections cp
         a <- readAccounts cp s
         return (Config a)
-    return rv

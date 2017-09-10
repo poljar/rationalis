@@ -12,6 +12,7 @@ module Argparse
 
 import Lib
 
+import Data.Char
 import Data.Time
 import Options.Applicative
 import Data.Semigroup ((<>))
@@ -43,7 +44,7 @@ data Options = Options
 
 digit :: RP.ReadP Char
 digit =
-    RP.satisfy (\char -> char >= '0' && char <= '9')
+    RP.satisfy isDigit
 
 numbers :: Int -> RP.ReadP Integer
 numbers digits =
@@ -72,7 +73,7 @@ numDateParser :: RP.ReadP Day
 numDateParser = do
     year <- numbers 4
     rest <- RP.option (1, 1) monthDayParser
-    return $ fromGregorian year (fst rest) (snd rest)
+    return $ uncurry (fromGregorian year) rest
 
 
 -- TODO Implement relative dates e.g. last year
@@ -121,6 +122,13 @@ parseOutFile = optional $ strOption $
     <> metavar "OUTFILE"
     <> help "Output file to use."
 
+parseInFile :: Parser (Maybe FilePath)
+parseInFile = optional $ strOption $
+       long  "input-file"
+    <> short 'i'
+    <> metavar "INFILE"
+    <> help "Input file to convert."
+
 parsePassword :: Parser (Maybe String)
 parsePassword = optional $ strOption $
        long    "password"
@@ -137,18 +145,12 @@ parseFetchOpts = FetchOptions <$> parseAccount
                               <*> periodOption
                               <*> parseOutFile
                               <*> parsePassword
---parseFetch :: Parser Command
---
+parseFetch :: Parser Command
 parseFetch = Fetch <$> parseFetchOpts
 
 parseConvert :: Parser Command
 parseConvert = Convert <$>
-    ( optional $ strOption $
-       long  "input-file"
-    <> short 'i'
-    <> metavar "INFILE"
-    <> help "Input file to convert."
-    )
+        parseInFile
     <*> parseOutFile
 
 parseCommand :: Parser Command
@@ -165,22 +167,19 @@ parseOptions = Options <$>
     <*> parseRulePath)
     <*> parseCommand
 
--- TODO this should fail if the supplied path is invalid.
 parseConfPath :: Parser (Maybe FilePath)
-parseConfPath =
-    ( optional $ strOption $
+parseConfPath = optional $ strOption $
       long "config"
   <>  short 'c'
   <>  metavar "FILENAME"
-  <>  help "Config file to use" )
+  <>  help "Config file to use"
 
 parseRulePath :: Parser (Maybe FilePath)
-parseRulePath =
-    ( optional $ strOption $
+parseRulePath = optional $ strOption $
       long "rules"
   <>  short 'r'
   <>  metavar "FILENAME"
-  <>  help "Rules file to use" )
+  <>  help "Rules file to use"
 
 opts = info (parseOptions <**> helper)
     ( fullDesc

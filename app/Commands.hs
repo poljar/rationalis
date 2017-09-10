@@ -7,6 +7,8 @@ import Rules
 import Config
 import Argparse
 
+import Control.Arrow
+
 import Data.Aeson
 import Data.Maybe
 import Data.Time.Calendar
@@ -42,14 +44,13 @@ createProcConf p user pw fetcher = setEnv env $ proc fetcher []
               ]
         (from, to) = case p of
             Nothing -> ("", "")
-            Just period -> ( showGregorian $ fst period
-                           , showGregorian $ snd period
-                           )
+            Just period -> (showGregorian *** showGregorian) period
+
 filterAccount :: String -> Account -> Bool
 filterAccount target (Account name _ _ _) = target == name
 
 findAccount :: String -> Config -> Maybe Account
-findAccount targetAcc (Config accs) = listToMaybe $ accounts
+findAccount targetAcc (Config accs) = listToMaybe accounts
     where
         accounts = filter (filterAccount targetAcc) accs
 
@@ -59,7 +60,7 @@ runFetch :: FetchOptions -> Config -> IO ()
 runFetch (FetchOptions targetAcc period file pass) conf = do
     (f, user) <- case account of
            Nothing -> die $ "Account '" ++ targetAcc ++ "' found."
-           Just  a -> return $ (fetcher a, userName a)
+           Just  a -> return (fetcher a, userName a)
 
     (out, err) <- readProcess_ $ createProcConf period user pass f
 

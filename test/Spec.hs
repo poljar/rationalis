@@ -14,7 +14,7 @@ tests = testGroup "Tests:" [unitTests]
 
 unitTests = testGroup "Unit tests:" [periodTests]
 
-periodTestCase s t = testCase s $ parseMaybe periodParser (fst t) @?= (snd t)
+periodTestCase s t = testCase s $ parseMaybe periodParser (fst t) @?= snd t
 
 periodTests = testGroup "Period tests:"
     [ periodTestCase "Simple years period" simpleYear

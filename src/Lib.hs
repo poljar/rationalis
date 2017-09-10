@@ -51,8 +51,8 @@ instance FromJSON Transaction
 instance Pretty Transaction where
     pPrint (Transaction id date description payAmount recAmount currency) =
         d <+> char '*' <+> desc
-            $$ (nest ident $ targetAcc <+> pay <+> cur <+> semi <+> i)
-            $$ (nest ident $ sourceAcc <+> rec <+> cur)
+            $$ nest ident (targetAcc <+> pay <+> cur <+> semi <+> i)
+            $$ nest ident (sourceAcc <+> rec <+> cur)
             where
                 ident     = 4
                 i         = text id
@@ -72,8 +72,8 @@ renderPrettyTransactions :: Transactions -> String
 renderPrettyTransactions ts = intercalate "\n\n" $ map prettyShow ts
 
 patternMatches :: Transaction -> Pattern -> Bool
-patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = any (obj ==) args
-patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args)         = any (obj ==) args
+patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Is args)      = obj `elem` args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args)         = obj `elem` args
 patternMatches (Transaction _ _ obj _ _ _) (Pattern Description Matches args) = any (obj =~) args
 patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args)    = any (obj =~) args
 
@@ -92,7 +92,7 @@ transformTransaction rs t = foldl executeAction t a
     where (Rule _ _ a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
 
 transformTransactions :: Rules -> Transactions -> Transactions
-transformTransactions r t = map (transformTransaction r) t
+transformTransactions r = map (transformTransaction r)
 
 getJSON :: Maybe FilePath -> IO B.ByteString
 getJSON (Just file) = B.readFile file

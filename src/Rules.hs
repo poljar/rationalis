@@ -47,20 +47,23 @@ data Action = Action
 
 data Objects     = Description | Currency deriving (Show)
 instance Read Objects where
-    readsPrec _ str = if str == "description" then [(Description, "")]
-                      else if  str == "currency" then [(Currency, "")]
-                      else []
+    readsPrec _ str
+      | str == "description" = [(Description, "")]
+      | str == "currency"    = [(Currency, "")]
+      | otherwise            = []
 
 data MatchVerbs  = Is | Matches deriving (Show)
 instance Read MatchVerbs where
-    readsPrec _ str = if str == "is" then [(Is, "")]
-                      else if  str == "matches" then [(Matches, "")]
-                      else []
+    readsPrec _ str
+      | str == "is"      = [(Is, "")]
+      | str == "matches" = [(Matches, "")]
+      | otherwise        = []
 
 data ActionVerbs = Set deriving (Show)
 instance Read ActionVerbs where
-    readsPrec _ str = if str == "set" then [(Set, "")]
-                      else []
+    readsPrec _ str
+      | str == "set" = [(Set, "")]
+      | otherwise    = []
 
 sc :: Parser ()
 sc = L.space (void spaceChar) comments empty
@@ -95,7 +98,7 @@ patternVerbs :: Parser MatchVerbs
 patternVerbs   = read <$> (symbol "is" <|> symbol "matches")
 
 actionVerbs :: Parser ActionVerbs
-actionVerbs  = read <$> (symbol "set")
+actionVerbs  = read <$> symbol "set"
 
 parsePatternLine :: Parser Pattern
 parsePatternLine = L.lineFold sc $ \sc' -> do
