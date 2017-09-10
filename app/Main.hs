@@ -1,16 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
 
-import Rules
-import Config
 import Argparse
 import Commands
+import Config
+import Rules
 
 import Control.Exception
 
-import System.Exit
 import System.Directory
+import System.Exit
 import System.FilePath
 
 import Text.Megaparsec.Error (parseErrorPretty)
@@ -19,8 +20,8 @@ getFile :: FilePath -> (FilePath -> IO (Either t b)) -> (t -> String) -> IO b
 getFile f reader errorPrinter = do
     ret <- reader f
     case ret of
-      Left err -> die $ errorPrinter err
-      Right val -> return val
+        Left err -> die $ errorPrinter err
+        Right val -> return val
 
 getRules :: FilePath -> IO Rules
 getRules f = getFile f parseRulesFile parseErrorPretty
@@ -28,12 +29,16 @@ getRules f = getFile f parseRulesFile parseErrorPretty
 getConf :: FilePath -> IO Config
 getConf f = getFile f readConf confErrorPretty
 
-tryGetFile :: forall t. (Monoid t) => FilePath -> (FilePath -> IO t) -> IO t
+tryGetFile ::
+       forall t. (Monoid t)
+    => FilePath
+    -> (FilePath -> IO t)
+    -> IO t
 tryGetFile f fileReader = do
     ret <- try $ fileReader f :: IO (Either IOException t)
     case ret of
-      Left _ -> mempty
-      Right value -> return value
+        Left _ -> mempty
+        Right value -> return value
 
 tryGetRules :: FilePath -> IO Rules
 tryGetRules file = tryGetFile file getRules
@@ -44,31 +49,31 @@ tryGetConf file = tryGetFile file getConf
 checkFile :: FilePath -> IO FilePath
 checkFile f = do
     exists <- doesFileExist f
-    if exists then return f else die $ "No such file: " ++ show f
+    if exists
+        then return f
+        else die $ "No such file: " ++ show f
 
 fromMaybeGlobalOpts :: GlobalOptions -> IO (FilePath, FilePath)
 fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do
     confDir <- getXdgDirectory XdgConfig "rationalis"
-
-    confFile <- case mConfFile of
-        Nothing -> return (joinPath [confDir, "rationalis.conf"])
-        Just f  -> checkFile f
-
-    ruleFile <- case mRuleFile of
-        Nothing -> return (joinPath [confDir, "rationalis.rules"])
-        Just f  -> checkFile f
+    confFile <-
+        case mConfFile of
+            Nothing -> return (joinPath [confDir, "rationalis.conf"])
+            Just f -> checkFile f
+    ruleFile <-
+        case mRuleFile of
+            Nothing -> return (joinPath [confDir, "rationalis.rules"])
+            Just f -> checkFile f
     return (confFile, ruleFile)
 
 run :: Options -> IO ()
 run (Options globOpts cmd) = do
     (confFile, ruleFile) <- fromMaybeGlobalOpts globOpts
-
-    conf    <- tryGetConf  confFile
-    rules   <- tryGetRules ruleFile
-
+    conf <- tryGetConf confFile
+    rules <- tryGetRules ruleFile
     case cmd of
-      Fetch fetchOpts         -> runFetch fetchOpts conf
-      Convert inFile outFile  -> runConvert inFile outFile rules
+        Fetch fetchOpts -> runFetch fetchOpts conf
+        Convert inFile outFile -> runConvert inFile outFile rules
 
 main :: IO ()
 main = run =<< execArgparse

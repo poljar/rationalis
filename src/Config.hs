@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
+
 module Config
     ( readConf
     , readAccount
@@ -7,15 +8,13 @@ module Config
     , Accounts
     , Account(..)
     , Config(..)
-    )
-    where
+    ) where
 
-import Data.ConfigFile
 import Control.Monad.Except
+import Data.ConfigFile
 
 newtype Config = Config
-    { accounts  :: Accounts
---  , output-format? :: OutFormat
+    { accounts :: Accounts
     } deriving (Show)
 
 instance Monoid Config where
@@ -26,9 +25,9 @@ type Accounts = [Account]
 
 data Account = Account
     { accountName :: String
-    , fetcher     :: FilePath
-    , userName    :: String
-    , outDir      :: FilePath
+    , fetcher :: FilePath
+    , userName :: String
+    , outDir :: FilePath
     } deriving (Show)
 
 readAccount :: MonadError CPError m => ConfigParser -> SectionSpec -> m Account
@@ -38,14 +37,16 @@ readAccount cp s = do
     o <- get cp s "ledger-dir"
     return (Account s f u o)
 
-readAccounts :: MonadError CPError m => ConfigParser -> [SectionSpec] -> m Accounts
+readAccounts ::
+       MonadError CPError m => ConfigParser -> [SectionSpec] -> m Accounts
 readAccounts cp = mapM (readAccount cp)
 
 -- TODO better error messages
 confErrorPretty err = "Error parsing conf: " ++ show err
 
 readConf :: MonadIO m => FilePath -> m (Either CPError Config)
-readConf file = runExceptT $ do
+readConf file =
+    runExceptT $ do
         cp <- join $ liftIO $ readfile emptyCP file
         let s = sections cp
         a <- readAccounts cp s
