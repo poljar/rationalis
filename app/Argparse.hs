@@ -3,7 +3,6 @@ module Argparse
     ( execArgparse
     , parseMaybe
     , periodParser
-    , Password
     , FetchOptions(..)
     , Options(..)
     , GlobalOptions(..)
@@ -19,7 +18,6 @@ import Data.Semigroup ((<>))
 
 import qualified Text.ParserCombinators.ReadP as RP
 
-type Password = String
 type Account  = String
 
 data Command

@@ -4,6 +4,7 @@ module Lib
     ( Period
     , Transaction(..)
     , Transactions
+    , Password
     , renderPrettyTransactions
     , transformTransactions
     , getJSON
@@ -27,6 +28,7 @@ import Text.Regex.PCRE
 
 import qualified Data.ByteString.Lazy as B
 
+type Password = String
 type Period = (Day, Day)
 
 type Transactions = [Transaction]

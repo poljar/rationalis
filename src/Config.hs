@@ -3,6 +3,7 @@
 module Config
     ( readConf
     , readAccount
+    , confErrorPretty
     , Accounts
     , Account(..)
     , Config(..)
@@ -39,6 +40,9 @@ readAccount cp s = do
 
 readAccounts :: MonadError CPError m => ConfigParser -> [SectionSpec] -> m Accounts
 readAccounts cp s = mapM (readAccount cp) s
+
+-- TODO better error messages
+confErrorPretty err = "Error parsing conf: " ++ (show err)
 
 readConf :: MonadIO m => FilePath -> m (Either CPError Config)
 readConf file = do

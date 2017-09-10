@@ -39,7 +39,7 @@ library
 executable rationalis
   hs-source-dirs:      app
   main-is:             Main.hs
-  other-modules:       Argparse
+  other-modules:       Argparse, Commands
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , bytestring
