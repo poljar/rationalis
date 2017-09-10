@@ -3,6 +3,7 @@
 module Config
     ( readConf
     , readAccount
+    , Accounts
     , Account(..)
     , Config(..)
     )

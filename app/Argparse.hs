@@ -20,13 +20,15 @@ import Data.Semigroup ((<>))
 import qualified Text.ParserCombinators.ReadP as RP
 
 type Password = String
+type Account  = String
 
 data Command
     = Fetch FetchOptions
   | Convert (Maybe FilePath) (Maybe FilePath)
 
-data FetchOptions = FetchOptions 
-    { period   :: Maybe Period
+data FetchOptions = FetchOptions
+    { account  :: Account
+    , period   :: Maybe Period
     , outFile  :: Maybe FilePath
     , password :: Maybe Password
     }
@@ -128,7 +130,15 @@ parsePassword = optional $ strOption $
     <> metavar "PASSWORD"
     <> help    "Password to pass to the fetcher."
 
-parseFetchOpts = FetchOptions <$> periodOption <*> parseOutFile <*> parsePassword
+parseAccount :: Parser Account
+parseAccount = strArgument $
+       metavar "ACCOUNT"
+    <> help    "Account to use for fetching."
+
+parseFetchOpts = FetchOptions <$> parseAccount
+                              <*> periodOption
+                              <*> parseOutFile
+                              <*> parsePassword
 --parseFetch :: Parser Command
 --
 parseFetch = Fetch <$> parseFetchOpts
