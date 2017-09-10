@@ -181,7 +181,6 @@ opts =
         (parseOptions <**> helper)
         (fullDesc <>
          progDesc
-             "Fetch transaction data and convert it to ledger transactions." <>
-         Options.Applicative.header "bankfetcher - a bank transaction fetcher")
+             "Fetch transaction data and convert it to ledger transactions.")
 
 execArgparse = execParser opts
