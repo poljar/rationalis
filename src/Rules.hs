@@ -25,27 +25,19 @@ testrule :: Rule
 testrule  = Rule "nest" [Pattern Description Matches ["PBZ ATM*"]] [Action Set Description "BANKOMAT"]
 
 type Rules = [Rule]
-data Rule = Rule
-    { header  :: String
-    , pattern :: [Pattern]
-    , action  :: [Action]
-    } deriving (Show)
+data Rule  = Rule Header Patterns Actions deriving (Show)
 
+type Header   = String
+type Argument = String
 -- TODO the arguments could be a compiled regex, so we can type check regex
 -- strings
-data Pattern     = Pattern
-    { matchObject :: Objects
-    , matchVerb   :: MatchVerbs
-    , arguments   :: [String]
-    } deriving (Show)
+type Patterns    = [Pattern]
+data Pattern     = Pattern Objects MatchVerbs [Argument] deriving (Show)
 
-data Action = Action
-    { actionVerb   :: ActionVerbs
-    , actionObject :: Objects
-    , argument     :: String
-    } deriving (Show)
+type Actions = [Action]
+data Action  = Action ActionVerbs Objects Argument deriving (Show)
 
-data Objects     = Description | Currency deriving (Show)
+data Objects = Description | Currency deriving (Show)
 instance Read Objects where
     readsPrec _ str
       | str == "description" = [(Description, "")]
