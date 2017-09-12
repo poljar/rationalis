@@ -25,23 +25,19 @@ data Command
     = Fetch FetchOptions
     | Convert (Maybe FilePath)
               (Maybe FilePath)
+    | Pull Account
 
-data FetchOptions = FetchOptions
-    { account :: Account
-    , period :: Maybe Period
-    , outFile :: Maybe FilePath
-    , password :: Maybe Password
-    }
+data FetchOptions = FetchOptions Account
+                                 (Maybe Period)
+                                 (Maybe FilePath)
+                                 (Maybe Password)
 
 data GlobalOptions = GlobalOptions
     { confPath :: Maybe FilePath
     , rulePath :: Maybe FilePath
     }
 
-data Options = Options
-    { globalOpts :: GlobalOptions
-    , cmd :: Command
-    }
+data Options = Options GlobalOptions Command
 
 digit :: RP.ReadP Char
 digit = RP.satisfy isDigit
@@ -147,16 +143,23 @@ parseFetch = Fetch <$> parseFetchOpts
 parseConvert :: Parser Command
 parseConvert = Convert <$> parseInFile <*> parseOutFile
 
+parsePull :: Parser Command
+parsePull = Pull <$> parseAccount
+
 parseCommand :: Parser Command
 parseCommand =
     subparser $
     command
         "fetch"
-        (parseFetch `withInfo` "Fetch transaction data from the server.") <>
+        (parseFetch `withInfo` "Fetch transaction data for a configured account") <>
     command
         "convert"
         (parseConvert `withInfo`
-         "Convert a a file containing transaction data to ledger entries.")
+         "Convert a file containing transaction data to ledger entries.") <>
+    command
+        "pull"
+        (parsePull `withInfo`
+         "Pull transactions into your ledger directory")
 
 parseOptions :: Parser Options
 parseOptions =

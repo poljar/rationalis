@@ -74,6 +74,7 @@ run (Options globOpts cmd) = do
     case cmd of
         Fetch fetchOpts -> runFetch fetchOpts conf
         Convert inFile outFile -> runConvert inFile outFile rules
+        Pull acc -> runPull acc rules conf
 
 main :: IO ()
 main = run =<< execArgparse
