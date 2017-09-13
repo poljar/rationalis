@@ -64,16 +64,23 @@ findAccount targetAcc (Config accs) = listToMaybe accounts
     accounts = filter (filterAccount targetAcc) accs
 
 getAccountOrDie :: String -> Config -> IO Account
-getAccountOrDie targetAcc conf = case account of
-            Nothing -> die $ "Account '" ++ targetAcc ++ "' not found."
-            Just a -> return a
+getAccountOrDie targetAcc conf =
+    case account of
+        Nothing -> die $ "Account '" ++ targetAcc ++ "' not found."
+        Just a -> return a
   where
     account = findAccount targetAcc conf
 
 -- TODO don't read stderr, just leave it connected to the parent stderr
 -- TODO handle failed processes more gracefully
-runFetcher :: MonadIO m => Account -> Maybe Period -> Maybe Password -> m (L.ByteString, L.ByteString)
-runFetcher acc period pass = readProcess_ $ createProcConf period (userName acc) pass (fetcher acc)
+runFetcher ::
+       MonadIO m
+    => Account
+    -> Maybe Period
+    -> Maybe Password
+    -> m (L.ByteString, L.ByteString)
+runFetcher acc period pass =
+    readProcess_ $ createProcConf period (userName acc) pass (fetcher acc)
 
 runFetch :: FetchOptions -> Config -> IO ()
 runFetch (FetchOptions targetAcc period file pass) conf = do

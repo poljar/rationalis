@@ -120,7 +120,6 @@ fetchPBZ period =
 --        r <- S.postWith postOpts sess "https://httpbin.org/post" login_data
 --        print r
 --    S.getWith opts sess "https://net.pbz.hr/pbz365/app/logout"
-
 main :: IO ()
 main = do
     input <- getContents

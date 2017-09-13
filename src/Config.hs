@@ -13,7 +13,9 @@ module Config
 import Control.Monad.Except
 import Data.ConfigFile
 
-newtype Config = Config Accounts deriving (Show)
+newtype Config =
+    Config Accounts
+    deriving (Show)
 
 instance Monoid Config where
     mempty = Config []
