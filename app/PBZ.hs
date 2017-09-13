@@ -37,19 +37,51 @@ fromPBZ jsonData =
     traverse .
     to
         (\t ->
-             Transaction
-                 ("PBZ-" ++ (t ^?! key "transactionNumber" . _String & T.unpack))
-                 (t ^?! key "currencyDate" . _String & fromPBZDate)
-                 (t ^?! key "description" . _String & T.unpack &
-                  decodeHTMLentities)
-                 (t ^? key "payAmount" . key "amount" . _Number &
-                  fmap toRealFloat)
-                 (t ^? key "receiveAmount" . key "amount" . _Number &
-                  fmap toRealFloat)
-                 (t ^?! key "amountAfterTransaction" . key "currency" .
-                  key "currencyCode" .
-                  _String &
-                  T.unpack))
+             uncurry
+                 (Transaction
+                      ("PBZ-" ++
+                       (t ^?! key "transactionNumber" . _String & T.unpack))
+                      (t ^?! key "currencyDate" . _String & fromPBZDate)
+                      (t ^?! key "description" . _String & T.unpack &
+                       decodeHTMLentities))
+                 (getPostings t))
+  where
+    getPostings t = fromMaybeAmounts (getAmounts t)
+    getAmounts t =
+        ( getAmount t "payAmount"
+        , getAmount t "receiveAmount"
+        , getAmount t "creditDebtAmount")
+    getAmount t s = toMaybeAmount (amount t s) (currency t s)
+    amount t s = t ^? key s . key "amount" . _Number & fmap toRealFloat
+    currency t s = t ^? key s . key "currency" . key "currencyCode" . _String
+
+toMaybeAmount :: Maybe Float -> Maybe T.Text -> Maybe Amount
+toMaybeAmount (Just n) (Just s) = Just $ Amount n (T.unpack s)
+toMaybeAmount Nothing _ = Nothing
+toMaybeAmount _ Nothing = Nothing
+
+fromMaybeAmounts ::
+       (Maybe Amount, Maybe Amount, Maybe Amount) -> (Posting, Posting)
+fromMaybeAmounts (Just (Amount n c), Nothing, Nothing) =
+    ( Posting "Assets:PBZ" $ Amount (negate n) c
+    , Posting "Expenses:???" $ Amount n c)
+fromMaybeAmounts (Nothing, Just (Amount n1 c1), Just (Amount n2 c2)) =
+    if c1 /= c2 -- this is probably a currency conversion
+        then ( Posting "Assets:PBZ" $ Amount n1 c1
+             , Posting "Assets:PBZ" $ Amount (negate n2) c2)
+             -- normal income otherwise
+        else ( Posting "Assets:PBZ" $ Amount n1 c1
+             , Posting "Income:???" $ Amount (negate n1) c1)
+fromMaybeAmounts (Nothing, Just (Amount n c), Nothing) =
+    (Posting "Assets:PBZ" $ Amount n c, Posting "Income:???" $ Amount n c)
+fromMaybeAmounts (Just a, Nothing, Just b) =
+    if a == b
+        then ( Posting "Assets:PBZ" $ Amount (negate n) c
+             , Posting "Expenses:???" $ Amount n c)
+        else ( Posting "Assets:???" $ Amount n c
+             , Posting "Expenses:???" $ Amount 0.0 "Not implemented")
+  where
+    (Amount n c) = a
 
 getCsrf :: (Show str, StringLike str) => Response str -> str
 getCsrf r =
