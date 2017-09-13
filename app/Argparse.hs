@@ -47,7 +47,7 @@ numbers digits = fmap read (RP.count digits digit)
 
 dateSeparator :: RP.ReadP ()
 dateSeparator = do
-    RP.char '-' <|> RP.char '/'
+    _ <- RP.char '-' <|> RP.char '/'
     return ()
 
 mdNumberParser :: RP.ReadP Int
@@ -76,13 +76,13 @@ periodParser = do
     RP.skipSpaces
     _ <- RP.optional $ RP.string "from" <|> RP.string "since"
     RP.skipSpaces
-    since <- numDateParser
+    from <- numDateParser
     RP.skipSpaces
     _ <- RP.optional $ RP.string "to" <|> RP.string "until"
     RP.skipSpaces
-    until <- numDateParser
+    to <- numDateParser
     RP.eof
-    return (since, until)
+    return (from, to)
 
 parseMaybe :: RP.ReadP a -> String -> Maybe a
 parseMaybe parser input =
@@ -106,7 +106,7 @@ periodOption =
          help "Fetch transactions only for the given time-period.")
 
 withInfo :: Parser a -> String -> ParserInfo a
-withInfo opts desc = info (helper <*> opts) $ progDesc desc
+withInfo opt desc = info (helper <*> opt) $ progDesc desc
 
 parseOutFile :: Parser (Maybe FilePath)
 parseOutFile =
@@ -133,6 +133,7 @@ parseAccount :: Parser Account
 parseAccount =
     strArgument $ metavar "ACCOUNT" <> help "Account to use for fetching."
 
+parseFetchOpts :: Parser FetchOptions
 parseFetchOpts =
     FetchOptions <$> parseAccount <*> periodOption <*> parseOutFile <*>
     parsePassword
@@ -179,6 +180,7 @@ parseRulePath =
     strOption $
     long "rules" <> short 'r' <> metavar "FILENAME" <> help "Rules file to use"
 
+opts :: ParserInfo Options
 opts =
     info
         (parseOptions <**> helper)
@@ -186,4 +188,5 @@ opts =
          progDesc
              "Fetch transaction data and convert it to ledger transactions.")
 
+execArgparse :: IO Options
 execArgparse = execParser opts

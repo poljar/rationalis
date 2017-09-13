@@ -9,6 +9,7 @@ import Lib
 import Rules
 
 import Control.Arrow
+import Control.Monad.IO.Class (MonadIO)
 
 import Data.Aeson
 import Data.Maybe
@@ -41,7 +42,7 @@ createProcConf ::
     -> Maybe Password
     -> FilePath
     -> ProcessConfig () () ()
-createProcConf p user pw fetcher = setEnv env $ proc fetcher []
+createProcConf p user pw f = setEnv env $ proc f []
   where
     env =
         [ ("RATIONALIS_USER", user)
@@ -71,6 +72,7 @@ getAccountOrDie targetAcc conf = case account of
 
 -- TODO don't read stderr, just leave it connected to the parent stderr
 -- TODO handle failed processes more gracefully
+runFetcher :: MonadIO m => Account -> Maybe Period -> Maybe Password -> m (L.ByteString, L.ByteString)
 runFetcher acc period pass = readProcess_ $ createProcConf period (userName acc) pass (fetcher acc)
 
 runFetch :: FetchOptions -> Config -> IO ()

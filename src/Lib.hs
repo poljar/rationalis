@@ -34,12 +34,12 @@ type Period = (Day, Day)
 type Transactions = [Transaction]
 
 data Transaction = Transaction
-    { id          :: String
-    , date        :: Day
-    , description :: String
-    , payAmount   :: Maybe Float
-    , recAmount   :: Maybe Float
-    , currency    :: String
+    { transactionID :: String
+    , date          :: Day
+    , description   :: String
+    , payAmount     :: Maybe Float
+    , recAmount     :: Maybe Float
+    , currency      :: String
     } deriving (Generic, Show)
 
 instance ToJSON Transaction
@@ -49,18 +49,18 @@ instance FromJSON Transaction
 -- TODO the accounts should be part of the transaction
 -- TODO cleanup
 instance Pretty Transaction where
-    pPrint (Transaction id date description payAmount recAmount currency) =
+    pPrint (Transaction tID day des p r c) =
         d <+> char '*' <+> desc
             $$ nest ident (targetAcc <+> pay <+> cur <+> semi <+> i)
             $$ nest ident (sourceAcc <+> rec <+> cur)
             where
                 ident     = 4
-                i         = text id
-                d         = text $ formatTime defaultTimeLocale "%Y/%m/%d" date
-                desc      = text description
-                pay       = prettyFloat $ fromMaybe 0.00 payAmount
-                rec       = prettyFloat $ fromMaybe 0.00 recAmount
-                cur       = text currency
+                i         = text tID
+                d         = text $ formatTime defaultTimeLocale "%Y/%m/%d" day
+                desc      = text des
+                pay       = prettyFloat $ fromMaybe 0.00 p
+                rec       = prettyFloat $ fromMaybe 0.00 r
+                cur       = text c
                 sourceAcc = text $ printf accFormat ("Assets:PBZ"   :: String)
                 targetAcc = text $ printf accFormat ("Expenses:???" :: String)
                 accFormat = "%-30s"
