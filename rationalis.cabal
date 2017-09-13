@@ -3,11 +3,11 @@ version:             0.1
 -- synopsis:
 -- description:
 homepage:            https://github.com/poljar/rationalis#readme
-license:             BSD3
+license:             ISC
 license-file:        LICENSE
 author:              Damir Jelić
 maintainer:          poljar@termina.org.uk
-copyright:           Copyright: (c) 2017 Damir Jelić
+copyright:           Copyright (c) 2017 Damir Jelić
 category:            Tools
 build-type:          Simple
 extra-source-files:  README.md
