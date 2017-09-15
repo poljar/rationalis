@@ -22,7 +22,7 @@ library
                      , text
                      , lens
                      , aeson
-                     , pretty
+                     , ansi-wl-pprint
                      , tagsoup
                      , bytestring
                      , megaparsec
@@ -44,6 +44,7 @@ executable rationalis
                      , filepath
                      , directory
                      , megaparsec
+                     , ansi-wl-pprint
                      , ConfigFile
                      , typed-process
                      , optparse-applicative

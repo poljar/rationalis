@@ -15,16 +15,24 @@ import Data.Aeson
 import Data.List
 import Data.Maybe
 import Data.Time.Calendar
+import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 import System.Exit
+import System.IO
 import System.FilePath
 import System.Process.Typed
 
 import qualified Data.ByteString.Lazy.Char8 as L
 
 writeTransactions :: Maybe FilePath -> Transactions -> IO ()
-writeTransactions Nothing ts = putStrLn $ renderPrettyTransactions ts
-writeTransactions (Just f) ts = writeFile f $ renderPrettyTransactions ts
+writeTransactions Nothing ts = do
+    PP.putDoc $ PP.pretty ts
+    putStrLn ""
+
+writeTransactions (Just f) ts = do
+    handle <- openFile f WriteMode
+    PP.hPutDoc handle $ PP.pretty ts
+    hClose handle
 
 runConvert :: Maybe FilePath -> Maybe FilePath -> Rules -> IO ()
 runConvert inFile outFile rules = do

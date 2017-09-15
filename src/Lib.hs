@@ -8,7 +8,6 @@ module Lib
     , Posting(..)
     , Transactions
     , Password
-    , renderPrettyTransactions
     , transformTransactions
     , getJSON
     ) where
@@ -16,7 +15,6 @@ module Lib
 import Rules
 
 import Data.Aeson
-import Data.List
 import Data.Maybe
 import Data.Time
 
@@ -24,8 +22,7 @@ import GHC.Generics
 
 import System.IO
 
-import Text.PrettyPrint
-import Text.PrettyPrint.HughesPJClass
+import Text.PrettyPrint.ANSI.Leijen
 import Text.Printf
 import Text.Regex.PCRE
 
@@ -55,7 +52,9 @@ instance ToJSON Amount
 instance FromJSON Amount
 
 instance Pretty Amount where
-    pPrint (Amount n c) = prettyFloat n <+> text c
+    pretty (Amount n c) = numberColor $ prettyFloat n <+> text c
+        where
+            numberColor = magenta
 
 data Posting =
     Posting String
@@ -63,10 +62,10 @@ data Posting =
     deriving (Generic, Show)
 
 instance Pretty Posting where
-    pPrint (Posting account amount) = text prettyAcc <+> pPrint amount
+    pretty (Posting account amount) = prettyAcc <+> pretty amount
       where
-        prettyAcc = printf accFormat account
-        accFormat = "%-30s"
+          prettyAcc = accountColor $ fill 30 $ text account
+          accountColor = cyan
 
 instance ToJSON Posting
 
@@ -83,21 +82,30 @@ instance Ord Transaction where
     compare (Transaction _ d1 _ _ _) (Transaction _ d2 _ _ _) = compare d1 d2
 
 instance Pretty Transaction where
-    pPrint (Transaction tID day d p r) =
-        date <+>
-        char '*' <+>
-        desc $$ nest ident (pPrint p <+> semi <+> i) $$ nest ident (pPrint r)
+    pretty (Transaction tID day d p r) =
+        hang indentation
+        (header
+        <$$> pretty p <+> semi <+> i
+        <$$> pretty r)
       where
-        ident = 4
-        i = text "ID:" <+> text tID
-        date = text $ formatTime defaultTimeLocale "%Y/%m/%d" day
-        desc = text d
+        indentation = 4
+        header = date <+> char '*' <+> desc
+        i = text "ID:" <+> idColor (text tID)
+        date = dateColor $ text $ formatTime defaultTimeLocale "%Y/%m/%d" day
+        desc = descColor $ text d
+        dateColor = blue
+        descColor = yellow
+        idColor   = magenta
+
+    prettyList = v2sep . map pretty
+
+v2sep :: [Doc] -> Doc
+v2sep [] = Text.PrettyPrint.ANSI.Leijen.empty
+v2sep [x] = x
+v2sep (x:xs) = x <> line <> line <> v2sep xs
 
 prettyFloat :: Float -> Doc
 prettyFloat f = text $ printf "%10.2f" f
-
-renderPrettyTransactions :: Transactions -> String
-renderPrettyTransactions ts = intercalate "\n\n" $ map prettyShow ts
 
 patternMatches :: Transaction -> Pattern -> Bool
 patternMatches (Transaction _ _ obj _ _) (Pattern Description Is args) =
