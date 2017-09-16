@@ -15,6 +15,7 @@ module Lib
 import Rules
 
 import Data.Aeson
+import Data.List
 import Data.Maybe
 import Data.Time
 
@@ -133,7 +134,7 @@ transformTransaction rs t = foldl executeAction t a
     (Rule _ _ a) = fromMaybe (Rule "" [] []) $ findMatchingRule rs t
 
 transformTransactions :: Rules -> Transactions -> Transactions
-transformTransactions r = map (transformTransaction r)
+transformTransactions r ts = map (transformTransaction r) (sort ts)
 
 getJSON :: Maybe FilePath -> IO B.ByteString
 getJSON (Just file) = B.readFile file

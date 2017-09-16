@@ -12,7 +12,6 @@ import Control.Arrow
 import Control.Monad.IO.Class (MonadIO)
 
 import Data.Aeson
-import Data.List
 import Data.Maybe
 import Data.Time.Calendar
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
@@ -105,5 +104,5 @@ runPull a r c = do
     (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) Nothing Nothing
     let trans = decode out :: Maybe Transactions
     case trans of
-        Just ts -> writeTransactions Nothing $ transformTransactions r (sort ts)
+        Just ts -> writeTransactions Nothing $ transformTransactions r ts
         Nothing -> die "Error: Unable to parse input file."
