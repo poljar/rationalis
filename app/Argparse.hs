@@ -28,10 +28,11 @@ data Command
     | Pull Account
 
 data FetchOptions =
-    FetchOptions Account
+    FetchOptions FilePath
+                 (Maybe String)
+                 (Maybe Password)
                  (Maybe Period)
                  (Maybe FilePath)
-                 (Maybe Password)
 
 data GlobalOptions = GlobalOptions
     { confPath :: Maybe FilePath
@@ -125,6 +126,13 @@ parseInFile =
     long "input-file" <> short 'i' <> metavar "INFILE" <>
     help "Input file to convert."
 
+parseUser :: Parser (Maybe String)
+parseUser =
+    optional $
+    strOption $
+    long "user" <> short 'u' <> metavar "USER" <>
+    help "User name to pass to the fetcher."
+
 parsePassword :: Parser (Maybe String)
 parsePassword =
     optional $
@@ -136,10 +144,14 @@ parseAccount :: Parser Account
 parseAccount =
     strArgument $ metavar "ACCOUNT" <> help "Account to use for fetching."
 
+parseFetcher :: Parser FilePath
+parseFetcher =
+    strArgument $ metavar "FETCHER" <> help "Fetcher to run."
+
 parseFetchOpts :: Parser FetchOptions
 parseFetchOpts =
-    FetchOptions <$> parseAccount <*> periodOption <*> parseOutFile <*>
-    parsePassword
+    FetchOptions <$> parseFetcher <*> parseUser <*> parsePassword <*>
+    periodOption <*> parseOutFile
 
 parseFetch :: Parser Command
 parseFetch = Fetch <$> parseFetchOpts

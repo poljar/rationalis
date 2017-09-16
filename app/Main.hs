@@ -72,7 +72,7 @@ run (Options globOpts cmd) = do
     conf <- tryGetConf confFile
     rules <- tryGetRules ruleFile
     case cmd of
-        Fetch fetchOpts -> runFetch fetchOpts conf
+        Fetch fetchOpts -> runFetch fetchOpts
         Convert inFile outFile -> runConvert inFile outFile rules
         Pull acc -> runPull acc rules conf
 

@@ -46,18 +46,19 @@ writeFetchedFile Nothing out = L.putStr out
 writeFetchedFile (Just f) out = L.writeFile f out
 
 createProcConf ::
-       Maybe Period
-    -> String
+       FilePath
+    -> Maybe String
     -> Maybe Password
-    -> FilePath
+    -> Maybe Period
     -> ProcessConfig () () ()
-createProcConf p user pw f = setEnv env $ proc f []
+createProcConf f user pw p = setEnv env $ proc f []
   where
     env =
-        [ ("RATIONALIS_USER", user)
+        [ ("RATIONALIS_USER", fromMaybe "" user)
         , ("RATIONALIS_PASSWORD", fromMaybe "" pw)
         , ("RATIONALIS_FROM_DATE", from)
         , ("RATIONALIS_TO_DATE", to)
+        , ("RATIONALIS_LAST_ID", "")
         ]
     (from, to) =
         case p of
@@ -84,24 +85,24 @@ getAccountOrDie targetAcc conf =
 -- TODO handle failed processes more gracefully
 runFetcher ::
        MonadIO m
-    => Account
-    -> Maybe Period
+    => FilePath
+    -> Maybe String
     -> Maybe Password
+    -> Maybe Period
     -> m (L.ByteString, L.ByteString)
-runFetcher acc period pass =
-    readProcess_ $ createProcConf period (userName acc) pass (fetcher acc)
+runFetcher f user pass period =
+    readProcess_ $ createProcConf f user pass period
 
-runFetch :: FetchOptions -> Config -> IO ()
-runFetch (FetchOptions targetAcc period file pass) conf = do
-    acc <- getAccountOrDie targetAcc conf
-    (out, err) <- runFetcher acc period pass
+runFetch :: FetchOptions -> IO ()
+runFetch (FetchOptions f user pass period file) = do
+    (out, err) <- runFetcher f user pass period
     L.putStr err
     writeFetchedFile file out
 
 runPull :: String -> Rules -> Config -> IO ()
 runPull a r c = do
     acc <- getAccountOrDie a c
-    (out, err) <- runFetcher acc Nothing Nothing
+    (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) Nothing Nothing
     let trans = decode out :: Maybe Transactions
     case trans of
         Just ts -> writeTransactions Nothing $ transformTransactions r (sort ts)
