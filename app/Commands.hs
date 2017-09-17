@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -13,12 +14,15 @@ import Control.Monad.IO.Class (MonadIO)
 
 import Data.Aeson
 import Data.Maybe
-import Data.Time.Calendar
+import Data.Time
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
+import GHC.Generics
+
+import System.Directory
 import System.Exit
-import System.IO
 import System.FilePath
+import System.IO
 import System.Process.Typed
 
 import qualified Data.ByteString.Lazy.Char8 as L
@@ -27,7 +31,6 @@ writeTransactions :: Maybe FilePath -> Transactions -> IO ()
 writeTransactions Nothing ts = do
     PP.putDoc $ PP.pretty ts
     putStrLn ""
-
 writeTransactions (Just f) ts = do
     handle <- openFile f WriteMode
     PP.hPutDoc handle $ PP.pretty ts
@@ -89,8 +92,7 @@ runFetcher ::
     -> Maybe Password
     -> Maybe Period
     -> m (L.ByteString, L.ByteString)
-runFetcher f user pass period =
-    readProcess_ $ createProcConf f user pass period
+runFetcher f user pass period = readProcess_ $ createProcConf f user pass period
 
 runFetch :: FetchOptions -> IO ()
 runFetch (FetchOptions f user pass period file) = do
@@ -98,11 +100,83 @@ runFetch (FetchOptions f user pass period file) = do
     L.putStr err
     writeFetchedFile file out
 
+type History = [HistEntry]
+
+data HistEntry =
+    HistEntry String
+              String
+              Day
+    deriving (Generic, Show)
+
+instance ToJSON HistEntry
+
+instance FromJSON HistEntry
+
+instance Eq HistEntry where
+    (HistEntry acc1 _ _) == (HistEntry acc2 _ _) = acc1 == acc2
+
+updateHistory :: String -> Transaction -> History -> History
+updateHistory acc t hs = newentry : filter (newentry /=) hs
+  where
+    newentry = HistEntry acc (transactionID t) (transactionDate t)
+
+getHistFile :: IO FilePath
+getHistFile = do
+    dataDir <- getXdgDirectory XdgData "rationalis"
+    createDirectoryIfMissing False dataDir
+    return $ dataDir </> "history"
+
+readHistory :: FilePath -> IO History
+readHistory histFile = do
+    maybeHistory <-
+        decode <$> tryGetFile histFile L.readFile :: IO (Maybe History)
+    return $ fromMaybe [] maybeHistory
+
+writeHistory :: String -> Transaction -> IO ()
+writeHistory acc t = do
+    histFile <- getHistFile
+    history <- readHistory histFile
+    let tmpFile = histFile <.> "new"
+    L.writeFile tmpFile (encode $ updateHistory acc t history)
+    renameFile tmpFile histFile
+
+mutateName :: Integer -> FilePath -> [FilePath] -> FilePath
+mutateName num name entries =
+    if newName `elem` entries
+        then mutateName (succ num) name entries
+        else newName
+  where
+    newName = baseName ++ "-" ++ show num <.> "ldg"
+    baseName = dropExtension name
+
+generateFileName :: String -> Day -> [FilePath] -> FilePath
+generateFileName accName day entries =
+    if name `elem` entries
+        then mutateName 1 name entries
+        else name
+  where
+    name = accName ++ "-" ++ dateString <.> "ldg"
+    dateString = showGregorian day
+
+getOutFile :: Account -> IO FilePath
+getOutFile acc = do
+    createDirectoryIfMissing False dir
+    entries <- listDirectory dir
+    today <- utctDay <$> getCurrentTime
+    return $ dir </> generateFileName accName today entries
+  where
+    dir = outDir acc
+    accName = accountName acc
+
 runPull :: String -> Rules -> Config -> IO ()
 runPull a r c = do
     acc <- getAccountOrDie a c
     (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) Nothing Nothing
+    L.hPutStr stderr err
+    fileName <- getOutFile acc
     let trans = decode out :: Maybe Transactions
     case trans of
-        Just ts -> writeTransactions Nothing $ transformTransactions r ts
+        Just ts -> do
+            writeTransactions (Just fileName) (transformTransactions r ts)
+            writeHistory (accountName acc) (last ts)
         Nothing -> die "Error: Unable to parse input file."

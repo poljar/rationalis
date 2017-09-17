@@ -150,12 +150,12 @@ parseActionLine = do
 
 parseRule :: Parser Rule
 parseRule = do
-    name <- parseName
+    ruleName <- parseName
     sc
     patternLines <- some parsePatternLine
     sc
     actionLines <- some parseActionLine
-    return $ Rule name patternLines actionLines
+    return $ Rule ruleName patternLines actionLines
 
 parseRules :: Parser Rules
 parseRules = many parseRule <* eof

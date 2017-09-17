@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveGeneric #-}
 
 module Lib
@@ -10,9 +11,12 @@ module Lib
     , Password
     , transformTransactions
     , getJSON
+    , tryGetFile
     ) where
 
 import Rules
+
+import Control.Exception
 
 import Data.Aeson
 import Data.List
@@ -139,3 +143,14 @@ transformTransactions r ts = map (transformTransaction r) (sort ts)
 getJSON :: Maybe FilePath -> IO B.ByteString
 getJSON (Just file) = B.readFile file
 getJSON Nothing = B.hGetContents stdin
+
+tryGetFile ::
+       forall t. (Monoid t)
+    => FilePath
+    -> (FilePath -> IO t)
+    -> IO t
+tryGetFile f fileReader = do
+    ret <- try $ fileReader f :: IO (Either IOException t)
+    case ret of
+        Left _ -> mempty
+        Right value -> return value

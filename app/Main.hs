@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
 import Argparse
 import Commands
 import Config
+import Lib
 import Rules
-
-import Control.Exception
 
 import System.Directory
 import System.Exit
@@ -28,17 +26,6 @@ getRules f = getFile f parseRulesFile parseErrorPretty
 
 getConf :: FilePath -> IO Config
 getConf f = getFile f readConf confErrorPretty
-
-tryGetFile ::
-       forall t. (Monoid t)
-    => FilePath
-    -> (FilePath -> IO t)
-    -> IO t
-tryGetFile f fileReader = do
-    ret <- try $ fileReader f :: IO (Either IOException t)
-    case ret of
-        Left _ -> mempty
-        Right value -> return value
 
 tryGetRules :: FilePath -> IO Rules
 tryGetRules file = tryGetFile file getRules
