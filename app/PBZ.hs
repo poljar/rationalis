@@ -65,16 +65,14 @@ fromMaybeAmounts ::
 fromMaybeAmounts (Just (Amount n c), Nothing, Nothing) =
     ( Posting "Assets:PBZ" $ Amount (negate n) c
     , Posting "Expenses:???" $ Amount n c)
-
-fromMaybeAmounts (Nothing, Just (Amount n1 c1), Just (Amount n2 c2)) =
+fromMaybeAmounts (Nothing, Just (Amount n1 c1), Just (Amount n2 c2))
     -- this is probably a currency conversion
+ =
     ( Posting "Assets:PBZ" $ Amount (negate n2) c2
     , Posting "Assets:PBZ" $ Amount n1 c1)
-
 fromMaybeAmounts (Nothing, Just (Amount n c), Nothing) =
     ( Posting "Income:???" $ Amount (negate n) c
     , Posting "Assets:PBZ" $ Amount n c)
-
 fromMaybeAmounts (Just a, Nothing, Just b) =
     if a == b -- ATM transactions have this form
         then ( Posting "Assets:PBZ" $ Amount (negate n) c

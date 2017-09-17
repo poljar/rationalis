@@ -145,13 +145,13 @@ parseAccount =
     strArgument $ metavar "ACCOUNT" <> help "Account to use for fetching."
 
 parseFetcher :: Parser FilePath
-parseFetcher =
-    strArgument $ metavar "FETCHER" <> help "Fetcher to run."
+parseFetcher = strArgument $ metavar "FETCHER" <> help "Fetcher to run."
 
 parseFetchOpts :: Parser FetchOptions
 parseFetchOpts =
     FetchOptions <$> parseFetcher <*> parseUser <*> parsePassword <*>
-    periodOption <*> parseOutFile
+    periodOption <*>
+    parseOutFile
 
 parseFetch :: Parser Command
 parseFetch = Fetch <$> parseFetchOpts

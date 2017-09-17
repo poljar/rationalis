@@ -58,8 +58,8 @@ instance FromJSON Amount
 
 instance Pretty Amount where
     pretty (Amount n c) = numberColor $ prettyFloat n <+> text c
-        where
-            numberColor = magenta
+      where
+        numberColor = magenta
 
 data Posting =
     Posting String
@@ -69,8 +69,8 @@ data Posting =
 instance Pretty Posting where
     pretty (Posting account amount) = prettyAcc <+> pretty amount
       where
-          prettyAcc = accountColor $ fill 30 $ text account
-          accountColor = cyan
+        prettyAcc = accountColor $ fill 30 $ text account
+        accountColor = cyan
 
 instance ToJSON Posting
 
@@ -88,10 +88,7 @@ instance Ord Transaction where
 
 instance Pretty Transaction where
     pretty (Transaction tID day d p r) =
-        hang indentation
-        (header
-        <$$> pretty p <+> semi <+> i
-        <$$> pretty r)
+        hang indentation (header <$$> pretty p <+> semi <+> i <$$> pretty r)
       where
         indentation = 4
         header = date <+> char '*' <+> desc
@@ -100,8 +97,7 @@ instance Pretty Transaction where
         desc = descColor $ text d
         dateColor = blue
         descColor = yellow
-        idColor   = magenta
-
+        idColor = magenta
     prettyList = v2sep . map pretty
 
 v2sep :: [Doc] -> Doc
