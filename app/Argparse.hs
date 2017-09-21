@@ -25,7 +25,7 @@ data Command
     = Fetch FetchOptions
     | Convert (Maybe FilePath)
               (Maybe FilePath)
-    | Pull Account
+    | Pull Account (Maybe Password)
 
 data FetchOptions =
     FetchOptions FilePath
@@ -160,7 +160,7 @@ parseConvert :: Parser Command
 parseConvert = Convert <$> parseInFile <*> parseOutFile
 
 parsePull :: Parser Command
-parsePull = Pull <$> parseAccount
+parsePull = Pull <$> parseAccount <*> parsePassword
 
 parseCommand :: Parser Command
 parseCommand =

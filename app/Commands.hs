@@ -17,7 +17,7 @@ import Data.Maybe
 import Data.Time
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
-import GHC.Generics
+import GHC.Generics (Generic)
 
 import System.Directory
 import System.Exit
@@ -52,15 +52,16 @@ createProcConf ::
     -> Maybe String
     -> Maybe Password
     -> Maybe Period
+    -> Maybe String
     -> ProcessConfig () () ()
-createProcConf f user pw p = setEnv env $ proc f []
+createProcConf f user pw p lastId = setEnv env $ proc f []
   where
     env =
         [ ("RATIONALIS_USER", fromMaybe "" user)
         , ("RATIONALIS_PASSWORD", fromMaybe "" pw)
         , ("RATIONALIS_FROM_DATE", from)
         , ("RATIONALIS_TO_DATE", to)
-        , ("RATIONALIS_LAST_ID", "")
+        , ("RATIONALIS_LAST_ID", fromMaybe "" lastId)
         ]
     (from, to) =
         case p of
@@ -91,12 +92,14 @@ runFetcher ::
     -> Maybe String
     -> Maybe Password
     -> Maybe Period
+    -> Maybe String
     -> m (L.ByteString, L.ByteString)
-runFetcher f user pass period = readProcess_ $ createProcConf f user pass period
+runFetcher f user pass period lastId =
+    readProcess_ $ createProcConf f user pass period lastId
 
 runFetch :: FetchOptions -> IO ()
 runFetch (FetchOptions f user pass period file) = do
-    (out, err) <- runFetcher f user pass period
+    (out, err) <- runFetcher f user pass period Nothing
     L.putStr err
     writeFetchedFile file out
 
@@ -168,10 +171,11 @@ getOutFile acc = do
     dir = outDir acc
     accName = accountName acc
 
-runPull :: String -> Rules -> Config -> IO ()
-runPull a r c = do
+runPull :: String -> Maybe Password -> Rules -> Config -> IO ()
+runPull a pw r c = do
     acc <- getAccountOrDie a c
-    (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) Nothing Nothing
+    -- TODO pass the history to the fetcher
+    (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) pw Nothing Nothing
     L.hPutStr stderr err
     fileName <- getOutFile acc
     let trans = decode out :: Maybe Transactions
