@@ -7,7 +7,7 @@ module Commands where
 import Argparse
 import Config
 import Lib
-import Rules
+import Rules hiding (Account)
 
 import Control.Arrow
 import Control.Monad.IO.Class (MonadIO)

@@ -79,6 +79,7 @@ test-suite rationalis-test
   build-depends:       base
                      , tasty
                      , time
+                     , megaparsec
                      , tasty-hunit
                      , optparse-applicative
                      , rationalis

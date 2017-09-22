@@ -43,8 +43,8 @@ data Transaction = Transaction
     { transactionID :: String
     , transactionDate :: Day
     , description :: String
-    , fromPosting :: Posting
-    , toPosting :: Posting
+    , payerPosting :: Posting
+    , payeePosting :: Posting
     } deriving (Generic, Show)
 
 data Amount =
@@ -57,7 +57,7 @@ instance ToJSON Amount
 instance FromJSON Amount
 
 instance Pretty Amount where
-    pretty (Amount n c) = numberColor $ prettyFloat n <+> text c
+    pretty (Lib.Amount n c) = numberColor $ prettyFloat n <+> text c
       where
         numberColor = magenta
 
@@ -109,22 +109,20 @@ prettyFloat :: Float -> Doc
 prettyFloat f = text $ printf "%10.2f" f
 
 patternMatches :: Transaction -> Pattern -> Bool
-patternMatches (Transaction _ _ obj _ _) (Pattern Description Is args) =
-    obj `elem` args
--- patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Is args) =
---     obj `elem` args
-patternMatches (Transaction _ _ obj _ _) (Pattern Description Matches args) =
-    any (obj =~) args
+patternMatches
+    (Transaction _ _ obj _ _)
+    (Pattern (Left Description) Is args) = obj `elem` args
 
--- patternMatches (Transaction _ _ _ _ _ obj) (Pattern Currency Matches args) =
---     any (obj =~) args
+patternMatches
+    (Transaction _ _ obj _ _)
+    (Pattern (Left Description) Matches args) = any (obj =~) args
+
 ruleMatches :: Transaction -> Rule -> Bool
 ruleMatches t (Rule _ p _) = all (patternMatches t) p
 
 executeAction :: Transaction -> Action -> Transaction
-executeAction t (Action Set Description arg) = t {description = arg}
+executeAction t (Action Set (Left Description) arg) = t {description = arg}
 
--- executeAction t (Action Set Currency arg) = t {currency = arg}
 findMatchingRule :: Rules -> Transaction -> Maybe Rule
 findMatchingRule rs t = listToMaybe $ filter (ruleMatches t) rs
 

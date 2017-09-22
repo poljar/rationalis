@@ -4,12 +4,24 @@ module Rules
     ( Rule(..)
     , Rules
     , Pattern(..)
-    , Objects(..)
+    , Objects
     , MatchVerbs(..)
     , Action(..)
+    , SingleWordObject(..)
+    , TwoWordObject(..)
+    , Adjective(..)
+    , Noun(..)
     , ActionVerbs(..)
     , parseRules
-    , testrule
+    , parseRule
+    , parseName
+    , singleWordObject
+    , twoWordObject
+    , objects
+    , patternVerbs
+    , actionVerbs
+    , parsePatternLine
+    , parseActionLine
     , parseRulesFile
     ) where
 
@@ -21,20 +33,13 @@ import Text.Megaparsec.String
 
 import qualified Text.Megaparsec.Lexer as L
 
-testrule :: Rule
-testrule =
-    Rule
-        "nest"
-        [Pattern Description Matches ["PBZ ATM*"]]
-        [Action Set Description "BANKOMAT"]
-
 type Rules = [Rule]
 
 data Rule =
     Rule Header
          Patterns
          Actions
-    deriving (Show)
+    deriving (Show, Eq)
 
 type Header = String
 
@@ -48,7 +53,7 @@ data Pattern =
     Pattern Objects
             MatchVerbs
             [Argument]
-    deriving (Show)
+    deriving (Show, Eq)
 
 type Actions = [Action]
 
@@ -56,23 +61,41 @@ data Action =
     Action ActionVerbs
            Objects
            Argument
-    deriving (Show)
+    deriving (Show, Eq)
 
-data Objects
-    = Description
-    | Currency
-    deriving (Show)
 
-instance Read Objects where
+data SingleWordObject = Description deriving (Show, Eq)
+
+data TwoWordObject = TwoWordObject Adjective Noun deriving (Show, Eq)
+
+data Adjective = Payer | Payee deriving (Show, Eq)
+
+data Noun = Account | Currency | Amount deriving (Show, Eq)
+
+type Objects = Either SingleWordObject TwoWordObject
+
+instance Read Adjective where
     readsPrec _ str
-        | str == "description" = [(Description, "")]
-        | str == "currency" = [(Currency, "")]
-        | otherwise = []
+      | str == "payer" = [(Payer, "")]
+      | str == "payee" = [(Payee, "")]
+      | otherwise = []
+
+instance Read Noun where
+    readsPrec _ str
+      | str == "account"  = [(Account, "")]
+      | str == "currency" = [(Currency, "")]
+      | str == "amount"   = [(Amount, "")]
+      | otherwise = []
+
+instance Read SingleWordObject where
+    readsPrec _ str
+      | str == "description" = [(Description, "")]
+      | otherwise = []
 
 data MatchVerbs
     = Is
     | Matches
-    deriving (Show)
+    deriving (Show, Eq)
 
 instance Read MatchVerbs where
     readsPrec _ str
@@ -82,7 +105,7 @@ instance Read MatchVerbs where
 
 data ActionVerbs =
     Set
-    deriving (Show)
+    deriving (Show, Eq)
 
 instance Read ActionVerbs where
     readsPrec _ str
@@ -121,7 +144,16 @@ quotedChar = satisfy isQuotedChar <?> "valid characters for a quoted string"
 quotedString = quotes $ some quotedChar
 
 objects :: Parser Objects
-objects = read <$> (symbol "description" <|> symbol "currency")
+objects = eitherP singleWordObject twoWordObject
+
+singleWordObject :: Parser SingleWordObject
+singleWordObject = read <$> (symbol "description" <|> symbol "date" <|> symbol "id")
+
+twoWordObject :: Parser TwoWordObject
+twoWordObject = do
+    adjective <- read <$> (symbol "payee" <|> symbol "payer")
+    noun <- read <$> (symbol "account" <|> symbol "currency" <|> symbol "amount")
+    return $ TwoWordObject adjective noun
 
 patternVerbs :: Parser MatchVerbs
 patternVerbs = read <$> (symbol "is" <|> symbol "matches")
