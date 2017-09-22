@@ -12,6 +12,7 @@ module Lib
     , transformTransactions
     , getJSON
     , tryGetFile
+    , hPutDoc'
     ) where
 
 import Rules
@@ -26,6 +27,7 @@ import Data.Time
 import GHC.Generics
 
 import System.IO
+import System.Console.ANSI (hSetSGR, hSupportsANSI)
 
 import Text.PrettyPrint.ANSI.Leijen
 import Text.Printf
@@ -107,6 +109,33 @@ v2sep (x:xs) = x <> line <> line <> v2sep xs
 
 prettyFloat :: Float -> Doc
 prettyFloat f = text $ printf "%10.2f" f
+
+-- TODO this should probably go upstream
+displayIO' :: Handle -> SimpleDoc -> IO ()
+displayIO' handle simpleDoc
+    = display simpleDoc
+    where
+      display SFail         = error $ "@SFail@ can not appear uncaught in a " ++
+                              "rendered @SimpleDoc@"
+      display SEmpty         = return ()
+      display (SChar c x)    = do{ hPutChar handle c; display x}
+      display (SText _ s x)  = do{ hPutStr handle s; display x}
+      display (SLine i x)    = do{ hPutStr handle ('\n':indentation i); display x}
+      display (SSGR s x)     = do
+          supportsANSI <- hSupportsANSI handle
+          if supportsANSI then
+                          do{ hSetSGR handle s; display x}
+                          else display x
+
+indentation :: Int -> String
+indentation = spaces
+
+spaces :: Int -> String
+spaces n        | n <= 0    = ""
+                | otherwise = replicate n ' '
+
+hPutDoc' :: Handle -> Doc -> IO ()
+hPutDoc' handle doc = displayIO' handle (renderPretty 0.4 80 doc)
 
 -- TODO this could use some refactoring
 patternMatches :: Transaction -> Pattern -> Bool

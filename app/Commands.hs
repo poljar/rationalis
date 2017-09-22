@@ -15,7 +15,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.Aeson
 import Data.Maybe
 import Data.Time
-import qualified Text.PrettyPrint.ANSI.Leijen as PP
+import Text.PrettyPrint.ANSI.Leijen (pretty)
 
 import GHC.Generics (Generic)
 
@@ -29,11 +29,11 @@ import qualified Data.ByteString.Lazy.Char8 as L
 
 writeTransactions :: Maybe FilePath -> Transactions -> IO ()
 writeTransactions Nothing ts = do
-    PP.putDoc $ PP.pretty ts
+    hPutDoc' stdout $ pretty ts
     putStrLn ""
 writeTransactions (Just f) ts = do
     handle <- openFile f WriteMode
-    PP.hPutDoc handle $ PP.pretty ts
+    hPutDoc' handle $ pretty ts
     hClose handle
 
 runConvert :: Maybe FilePath -> Maybe FilePath -> Rules -> IO ()

@@ -23,11 +23,12 @@ library
                      , text
                      , lens
                      , aeson
-                     , ansi-wl-pprint
                      , tagsoup
                      , bytestring
                      , megaparsec
                      , regex-pcre
+                     , ansi-terminal
+                     , ansi-wl-pprint
                      , ConfigFile
   default-language:    Haskell2010
 
