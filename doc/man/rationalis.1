@@ -9,14 +9,12 @@
 .Sh SYNOPSIS
 .Nm
 .Cm convert
-.Op Fl c Ar config-file
 .Op Fl r Ar rules-file
 .Op Fl i Ar input-file
 .Op Fl o Ar output-file
 .Nm
-.Cm fetch Ar account
-.Op Fl c Ar config-file
-.Op Fl r Ar rules-file
+.Cm fetch Ar fetcher
+.Op Fl u Ar user-name
 .Op Fl o Ar output-file
 .Op Fl p Ar period
 .Op Fl P Ar password
@@ -24,6 +22,7 @@
 .Cm pull Ar account
 .Op Fl c Ar config-file
 .Op Fl r Ar rules-file
+.Op Fl P Ar password
 .\" ---------------------------------------------------------------------------
 .Sh DESCRIPTION
 Accounting is boring, let a
@@ -55,10 +54,10 @@ Specify an input
 .Ar file ,
 if the flag is not provided stdin is used.
 .El
-.It Cm fetch Ar account
-Fetch transaction data from a configured
-.Ar account
-and print them out.
+.It Cm fetch Ar fetcher
+Run a
+.Ar fetcher
+to get transaction data from remote sources.
 The command line flags to change the behaviour of the command:
 .Bl -tag -width Ds
 .It Fl o , Fl -output-file Ar file
@@ -72,9 +71,21 @@ Fetch transactions only for the given
 Provide the
 .Ar password
 on the command line instead of asking for it.
+.It Fl u , Fl -user Ar user-name
+User name which will be passed to the fetcher.
 .El
 .It Cm pull
-TODO
+The
+.Cm pull
+command is used to get automatically transactions from a remote
+location and store them in your ledger directory of choosing.
+The command line flags to change the behaviour of the command:
+.Bl -tag -width Ds
+.It Fl P , Fl -password Ar password
+Provide the
+.Ar password
+that will get passed to the fetcher.
+.El
 .El
 .\" ---------------------------------------------------------------------------
 .Sh FILES
