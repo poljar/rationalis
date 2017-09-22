@@ -5,6 +5,7 @@ module Rules
     , Rules
     , Pattern(..)
     , Objects
+    , Arguments
     , MatchVerbs(..)
     , Action(..)
     , SingleWordObject(..)
@@ -44,9 +45,11 @@ data Rule =
 type Header = String
 
 type Argument = String
+type Arguments = [Argument]
 
 -- TODO the arguments could be a compiled regex, so we can type check regex
--- strings
+-- strings or they could also be a date and float for date and amount
+-- comparison
 type Patterns = [Pattern]
 
 data Pattern =
@@ -70,7 +73,7 @@ data TwoWordObject = TwoWordObject Adjective Noun deriving (Show, Eq)
 
 data Adjective = Payer | Payee deriving (Show, Eq)
 
-data Noun = Account | Currency | Amount deriving (Show, Eq)
+data Noun = Account | Currency deriving (Show, Eq)
 
 type Objects = Either SingleWordObject TwoWordObject
 
@@ -84,7 +87,6 @@ instance Read Noun where
     readsPrec _ str
       | str == "account"  = [(Account, "")]
       | str == "currency" = [(Currency, "")]
-      | str == "amount"   = [(Amount, "")]
       | otherwise = []
 
 instance Read SingleWordObject where
