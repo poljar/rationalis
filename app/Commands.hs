@@ -13,6 +13,7 @@ import Control.Arrow
 import Control.Monad.IO.Class (MonadIO)
 
 import Data.Aeson
+import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.Maybe
 import Data.Time
 import Text.PrettyPrint.ANSI.Leijen (pretty)
@@ -101,7 +102,9 @@ runFetch :: FetchOptions -> IO ()
 runFetch (FetchOptions f user pass period file) = do
     (out, err) <- runFetcher f user pass period Nothing
     L.putStr err
-    writeFetchedFile file out
+    case (decode out :: Maybe Transactions) of
+        Just ts -> writeFetchedFile file $ encodePretty ts
+        Nothing -> die "Error: Unable to parse fetched transactions."
 
 type History = [HistEntry]
 

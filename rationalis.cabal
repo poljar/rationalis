@@ -47,6 +47,7 @@ executable rationalis
                      , directory
                      , megaparsec
                      , ansi-wl-pprint
+                     , aeson-pretty
                      , ConfigFile
                      , typed-process
                      , optparse-applicative
