@@ -143,7 +143,7 @@ writeHistory acc t = do
     histFile <- getHistFile
     history <- readHistory histFile
     let tmpFile = histFile <.> "new"
-    L.writeFile tmpFile (encode $ updateHistory acc t history)
+    L.writeFile tmpFile (encodePretty $ updateHistory acc t history)
     renameFile tmpFile histFile
 
 mutateName :: Integer -> FilePath -> [FilePath] -> FilePath
