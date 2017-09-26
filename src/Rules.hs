@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 
 module Rules
     ( Rule(..)
@@ -29,14 +30,19 @@ module Rules
 import Control.Applicative (empty)
 import Control.Monad (void)
 import Data.Char
-import Data.Void (Void)
 import Text.Megaparsec
+
+#if MIN_VERSION_megaparsec(6,0,0)
+import Data.Void (Void)
 import Text.Megaparsec.Char
-import Text.Megaparsec.Error
-
 import qualified Text.Megaparsec.Char.Lexer as L
+type Parser = Parsec Void String
 
-type Parser = Parsec (ErrorFancy Void) String
+#else
+import qualified Text.Megaparsec.Lexer as L
+type Parser = Parsec Dec String
+#endif
+
 type Rules = [Rule]
 
 data Rule =
