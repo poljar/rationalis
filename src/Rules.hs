@@ -29,11 +29,14 @@ module Rules
 import Control.Applicative (empty)
 import Control.Monad (void)
 import Data.Char
+import Data.Void (Void)
 import Text.Megaparsec
-import Text.Megaparsec.String
+import Text.Megaparsec.Char
+import Text.Megaparsec.Error
 
-import qualified Text.Megaparsec.Lexer as L
+import qualified Text.Megaparsec.Char.Lexer as L
 
+type Parser = Parsec (ErrorFancy Void) String
 type Rules = [Rule]
 
 data Rule =
