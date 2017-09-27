@@ -1,17 +1,21 @@
-BUILDDIR   ?= build
+BUILDDIR   ?= dist
 RUNHASKELL ?= runhaskell Setup --builddir=$(BUILDDIR)
 
 prefix ?= /usr
 HFLAGS := -O --enable-shared --enable-executable-dynamic --disable-library-vanilla \
 	  --prefix=$(prefix) --docdir=$(prefix)/share/doc/rationalis		   \
-	  --libsubdir=\$compiler/site-local/\$pkgid -f-lib-only $(HFLAGS)
+	  --libsubdir=\$compiler/site-local/\$pkgid -f-lib-only --enable-tests     \
+	  $(HFLAGS)
 
-all: rationalis
+all: rationalis pbz-fetcher
 
-.PHONY: install rationalis test clean
+.PHONY: install rationalis pbz-fetcher test clean
 
 rationalis: configure
-	$(RUNHASKELL) build
+	$(RUNHASKELL) build exe:rationalis
+
+pbz-fetcher: configure
+	$(RUNHASKELL) build exe:pbz-fetcher
 
 configure: $(BUILDDIR)/setup-config
 $(BUILDDIR)/setup-config:
@@ -36,4 +40,5 @@ clean:
 	$(RUNHASKELL) clean
 
 test:
+	$(RUNHASKELL) build test:rationalis-test
 	$(RUNHASKELL) test
