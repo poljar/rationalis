@@ -76,7 +76,7 @@ data Action =
     deriving (Show, Eq)
 
 
-data SingleWordObject = Description deriving (Show, Eq)
+data SingleWordObject = Description | Comment deriving (Show, Eq)
 
 data TwoWordObject = TwoWordObject Adjective Noun deriving (Show, Eq)
 
@@ -100,6 +100,7 @@ instance Read Noun where
 
 instance Read SingleWordObject where
     readsPrec _ str
+      | str == "comment"     = [(Comment, "")]
       | str == "description" = [(Description, "")]
       | otherwise = []
 

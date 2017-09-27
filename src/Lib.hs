@@ -145,8 +145,12 @@ hPutDoc' handle doc = displayIO' handle (renderPretty 0.4 80 doc)
 patternMatches :: Transaction -> Pattern -> Bool
 patternMatches (Transaction _ _ obj _ _ _) (Pattern (Left Description) Is args) =
     obj `elem` args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern (Left Comment) Is args) =
+    case obj of {Nothing -> False; Just v -> v `elem` args}
 patternMatches (Transaction _ _ obj _ _ _) (Pattern (Left Description) Matches args) =
     any (obj =~) args
+patternMatches (Transaction _ _ _ _ _ obj) (Pattern (Left Comment) Matches args) =
+    case obj of {Nothing -> False; Just v -> any (v =~) args}
 patternMatches (Transaction _ _ _ obj _ _) (Pattern (Right (TwoWordObject Payer noun)) Matches args) =
     twoWordObjectMatches obj noun args
 patternMatches (Transaction _ _ _ _ obj _) (Pattern (Right (TwoWordObject Payee noun)) Matches args) =
@@ -169,6 +173,7 @@ ruleMatches t (Rule _ p _) = all (patternMatches t) p
 
 executeAction :: Transaction -> Action -> Transaction
 executeAction t (Action Set (Left Description) arg) = t {description = arg}
+executeAction t (Action Set (Left Comment) arg) = t {transactionComment = Just arg}
 executeAction t
     (Action Set (Right (TwoWordObject Payer Account)) arg) =
         t {payerPosting = Posting arg amount}
