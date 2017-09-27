@@ -1,0 +1,4 @@
+[atm]
+description matches "BANK ATM*"
+set description "ATM CASH"
+set payee account "Expenses:Cash"

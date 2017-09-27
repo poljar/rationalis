@@ -1,0 +1,42 @@
+[
+    {
+        "transactionComment": null,
+        "payerPosting": [
+            "Assets:BANK",
+            [
+                -200,
+                "USD"
+            ]
+        ],
+        "transactionDate": "2017-07-17",
+        "transactionID": "BANK-801666",
+        "payeePosting": [
+            "Expenses:???",
+            [
+                200,
+                "USD"
+            ]
+        ],
+        "description": "BANK ATM LAKE SHORE DRIVE"
+    },
+    {
+        "transactionComment": "got a piece of heart finally, bailing now",
+        "payerPosting": [
+            "Assets:CTB",
+            [
+                -5000,
+                "Rupee"
+            ]
+        ],
+        "transactionDate": "2017-07-07",
+        "transactionID": "CTB-101001",
+        "payeePosting": [
+            "Expenses:???",
+            [
+                5000,
+                "Rupee"
+            ]
+        ],
+        "description": "BANK ATM WEST CLOCK TOWN"
+    }
+]
