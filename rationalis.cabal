@@ -16,7 +16,8 @@ cabal-version:       >=1.10
 executable rationalis
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       Argparse, Commands, Rules, Lib, Config
+  other-modules:       Argparse, Commands, Rules, Lib, Config, Transformations,
+                       Transaction
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , mtl
@@ -40,7 +41,7 @@ executable rationalis
 executable pbz-fetcher
   hs-source-dirs:      src
   main-is:             PBZ.hs
-  other-modules:       Lib, Rules
+  other-modules:       Lib, Transaction
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , bytestring
@@ -52,8 +53,6 @@ executable pbz-fetcher
                      , tagsoup
                      , scientific
                      , lens-aeson
-                     , megaparsec
-                     , regex-pcre
                      , ansi-terminal
                      , ansi-wl-pprint
                      , http-client

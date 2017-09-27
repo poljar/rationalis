@@ -3,6 +3,7 @@
 module Main where
 
 import Lib
+import Transaction
 
 import Data.Time
 
