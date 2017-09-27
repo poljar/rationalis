@@ -1,0 +1,29 @@
+# Maintainer: Damir Jelić <poljar@termina.org.uk>
+
+pkgname=rationalis
+pkgver=0.1
+pkgrel=1
+pkgdesc="JSON pretty-printing library and command-line tool."
+url="http://github.com/poljar/rationalis"
+license=("ISC")
+arch=('i686' 'x86_64')
+# TODO
+depends=('ghc-libs' "haskell-aeson" "haskell-attoparsec" "haskell-base-compat" "haskell-cmdargs"
+         "haskell-scientific" "haskell-text" "haskell-unordered-containers" "haskell-vector")
+makedepends=('ghc')
+source=("")
+sha512sums=('b429dad73923f6a7a5892b511af19b766d639c21bab8a2b8d1750a1f972c4f55c5139f37773474d303597cd4d02f168515be7b537f33ea62987e77fd3d701e8a')
+validpgpkeys=('487EACC08557AD082088DABA1EB2638FF56C0C53')
+
+build() {
+    make -C "$srcdir/$pkgname-$pkgver"
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+
+    make DESTDIR="$pkgdir" install
+
+    install -D -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    rm -f "${pkgdir}/usr/share/doc/${pkgname}/LICENSE"
+}
