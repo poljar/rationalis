@@ -1,0 +1,82 @@
+#compdef rationalis
+
+_rationalis_cmds() {
+    local commands; commands=(
+            'convert: Convert a file containing transaction data to ledger entries.'
+            'fetch: Fetch transaction data using a fetcher.'
+            'pull: Pull transactions for a configured account into your ledger directory'
+        )
+    _describe 'rationalis commands' commands
+}
+
+_rationalis_read_accounts() {
+    awk '
+    /^\[.*\]$/ {
+        sub(/\[/, "", $0)
+        sub(/\]/, "", $0)
+        print $0
+    }'
+}
+
+_rationalis_accounts() {
+    local -a accounts
+    local account
+
+    if [[ ! -a "$conf" ]]; then
+        _message 'Account'
+        return
+    fi
+
+    while read -r account; do
+        accounts+="$account"
+    done < <(_rationalis_read_accounts < "$conf")
+
+    _describe 'rationalis accounts' accounts
+}
+
+_rationalis() {
+    typeset -A opt_args
+    local state line curcontext="$curcontext"
+
+    local conf="${XDG_CONFIG_HOME:-$HOME/.config}/rationalis/config"
+
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[Display help and exit.]'                                  \
+        '(-r --rules)'{-r,--rules}'[Rules file to use.]:rules:_files -g \*.rules'           \
+        '(-c --config)'{-c,--config}'[Configuration file to use.]:config:_files -g \*.conf' \
+        '1:rationalis commands:_rationalis_cmds'                                            \
+        '*:: :->cmd_args'                                                                   \
+
+    (( $+opt_args[-c] ))       && conf=$opt_args[-c]
+    (( $+opt_args[--config] )) && conf=$opt_args[--config]
+
+    case $state in
+        cmd_args)
+            case $words[1] in
+                convert)
+                    _arguments -C \
+                        '(-h --help)'{-h,--help}'[Display help and exit.]'                                \
+                        '(-i --input-file)'{-i,--input-file}'[Input file to convert.]:input files:_files' \
+                        '(-o --output-file)'{-o,--output-file}'[Output file to use.]:output file:_files'  \
+                ;;
+                fetch)
+                    _arguments -C \
+                        '(-h --help)'{-h,--help}'[Display help and exit]'                                     \
+                        '(-o --output-file)'{-o,--output-file}'[Output file to use.]:output file:_files'      \
+                        '(-P --password)'{-P,--password}'[Password to pass to the fetcher.]:password'         \
+                        '(-p --period)'{-p,--period}'[Period to pass to the fetcher.]:period:_message period' \
+                        '(-u --user)'{-u,--user}'[User to pass to the fetcher.]:user'                         \
+                        '1:rationalis fetchers:_command_names -e'                                             \
+                ;;
+                pull)
+                    _arguments -C \
+                        '(-h --help)'{-h,--help}'[Display help and exit]'                             \
+                        '(-P --password)'{-P,--password}'[Password to pass to the fetcher.]:password' \
+                        '1:rationalis accounts:_rationalis_accounts'                                  \
+                ;;
+            esac
+        ;;
+    esac
+}
+
+_rationalis "$@"
