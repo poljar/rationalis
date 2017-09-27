@@ -45,7 +45,8 @@ fromPBZ jsonData =
                       (t ^?! key "currencyDate" . _String & fromPBZDate)
                       (t ^?! key "description" . _String & T.unpack &
                        decodeHTMLentities))
-                 (getPostings t) Nothing)
+                 (getPostings t)
+                 Nothing)
   where
     getPostings t = fromMaybeAmounts (getAmounts t)
     getAmounts t =

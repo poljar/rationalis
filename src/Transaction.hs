@@ -63,20 +63,24 @@ instance Eq Transaction where
     (Transaction id1 _ _ _ _ _) == (Transaction id2 _ _ _ _ _) = id1 == id2
 
 instance Ord Transaction where
-    compare (Transaction _ d1 _ _ _ _) (Transaction _ d2 _ _ _ _) = compare d1 d2
+    compare (Transaction _ d1 _ _ _ _) (Transaction _ d2 _ _ _ _) =
+        compare d1 d2
 
 instance Pretty Transaction where
     pretty (Transaction tID day d p r c) =
-        hang indentation (header
-                    <$$> pretty p <+> semi <+> i
-                    <$$> pretty r <+> comment)
+        hang
+            indentation
+            (header <$$> pretty p <+> semi <+> i <$$> pretty r <+> comment)
       where
         indentation = 4
         header = date <+> char '*' <+> desc
         i = text "ID:" <+> idColor (text tID)
         date = dateColor $ text $ formatTime defaultTimeLocale "%Y/%m/%d" day
         desc = descColor $ text d
-        comment = case c of {Nothing -> text ""; Just v -> text ";" <+> text v}
+        comment =
+            case c of
+                Nothing -> text ""
+                Just v -> text ";" <+> text v
         dateColor = blue
         descColor = yellow
         idColor = magenta

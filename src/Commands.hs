@@ -178,7 +178,8 @@ runPull :: String -> Maybe Password -> Rules -> Config -> IO ()
 runPull a pw r c = do
     acc <- getAccountOrDie a c
     -- TODO pass the history to the fetcher
-    (out, err) <- runFetcher (fetcher acc) (Just $ userName acc) pw Nothing Nothing
+    (out, err) <-
+        runFetcher (fetcher acc) (Just $ userName acc) pw Nothing Nothing
     L.hPutStr stderr err
     fileName <- getOutFile acc
     let trans = decode out :: Maybe Transactions

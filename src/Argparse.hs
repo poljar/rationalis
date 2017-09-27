@@ -25,7 +25,8 @@ data Command
     = Fetch FetchOptions
     | Convert (Maybe FilePath)
               (Maybe FilePath)
-    | Pull Account (Maybe Password)
+    | Pull Account
+           (Maybe Password)
 
 data FetchOptions =
     FetchOptions FilePath

@@ -31,18 +31,17 @@ import Control.Applicative (empty)
 import Control.Monad (void)
 import Data.Char
 import Text.Megaparsec
-
 #if MIN_VERSION_megaparsec(6,0,0)
 import Data.Void (Void)
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
-type Parser = Parsec Void String
 
+type Parser = Parsec Void String
 #else
 import qualified Text.Megaparsec.Lexer as L
+
 type Parser = Parsec Dec String
 #endif
-
 type Rules = [Rule]
 
 data Rule =
@@ -54,6 +53,7 @@ data Rule =
 type Header = String
 
 type Argument = String
+
 type Arguments = [Argument]
 
 -- TODO the arguments could be a compiled regex, so we can type check regex
@@ -75,34 +75,45 @@ data Action =
            Argument
     deriving (Show, Eq)
 
+data SingleWordObject
+    = Description
+    | Comment
+    deriving (Show, Eq)
 
-data SingleWordObject = Description | Comment deriving (Show, Eq)
+data TwoWordObject =
+    TwoWordObject Adjective
+                  Noun
+    deriving (Show, Eq)
 
-data TwoWordObject = TwoWordObject Adjective Noun deriving (Show, Eq)
+data Adjective
+    = Payer
+    | Payee
+    deriving (Show, Eq)
 
-data Adjective = Payer | Payee deriving (Show, Eq)
-
-data Noun = Account | Currency deriving (Show, Eq)
+data Noun
+    = Account
+    | Currency
+    deriving (Show, Eq)
 
 type Objects = Either SingleWordObject TwoWordObject
 
 instance Read Adjective where
     readsPrec _ str
-      | str == "payer" = [(Payer, "")]
-      | str == "payee" = [(Payee, "")]
-      | otherwise = []
+        | str == "payer" = [(Payer, "")]
+        | str == "payee" = [(Payee, "")]
+        | otherwise = []
 
 instance Read Noun where
     readsPrec _ str
-      | str == "account"  = [(Account, "")]
-      | str == "currency" = [(Currency, "")]
-      | otherwise = []
+        | str == "account" = [(Account, "")]
+        | str == "currency" = [(Currency, "")]
+        | otherwise = []
 
 instance Read SingleWordObject where
     readsPrec _ str
-      | str == "comment"     = [(Comment, "")]
-      | str == "description" = [(Description, "")]
-      | otherwise = []
+        | str == "comment" = [(Comment, "")]
+        | str == "description" = [(Description, "")]
+        | otherwise = []
 
 data MatchVerbs
     = Is
@@ -159,12 +170,14 @@ objects :: Parser Objects
 objects = eitherP singleWordObject twoWordObject
 
 singleWordObject :: Parser SingleWordObject
-singleWordObject = read <$> (symbol "description" <|> symbol "date" <|> symbol "id")
+singleWordObject =
+    read <$> (symbol "description" <|> symbol "date" <|> symbol "id")
 
 twoWordObject :: Parser TwoWordObject
 twoWordObject = do
     adjective <- read <$> (symbol "payee" <|> symbol "payer")
-    noun <- read <$> (symbol "account" <|> symbol "currency" <|> symbol "amount")
+    noun <-
+        read <$> (symbol "account" <|> symbol "currency" <|> symbol "amount")
     return $ TwoWordObject adjective noun
 
 patternVerbs :: Parser MatchVerbs
