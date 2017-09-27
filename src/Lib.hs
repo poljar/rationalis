@@ -47,6 +47,7 @@ data Transaction = Transaction
     , description :: String
     , payerPosting :: Posting
     , payeePosting :: Posting
+    , transactionComment :: Maybe String
     } deriving (Generic, Show)
 
 data Amount =
@@ -83,20 +84,23 @@ instance ToJSON Transaction
 instance FromJSON Transaction
 
 instance Eq Transaction where
-    (Transaction id1 _ _ _ _) == (Transaction id2 _ _ _ _) = id1 == id2
+    (Transaction id1 _ _ _ _ _) == (Transaction id2 _ _ _ _ _) = id1 == id2
 
 instance Ord Transaction where
-    compare (Transaction _ d1 _ _ _) (Transaction _ d2 _ _ _) = compare d1 d2
+    compare (Transaction _ d1 _ _ _ _) (Transaction _ d2 _ _ _ _) = compare d1 d2
 
 instance Pretty Transaction where
-    pretty (Transaction tID day d p r) =
-        hang indentation (header <$$> pretty p <+> semi <+> i <$$> pretty r)
+    pretty (Transaction tID day d p r c) =
+        hang indentation (header
+                    <$$> pretty p <+> semi <+> i
+                    <$$> pretty r <+> comment)
       where
         indentation = 4
         header = date <+> char '*' <+> desc
         i = text "ID:" <+> idColor (text tID)
         date = dateColor $ text $ formatTime defaultTimeLocale "%Y/%m/%d" day
         desc = descColor $ text d
+        comment = case c of {Nothing -> text ""; Just v -> text ";" <+> text v}
         dateColor = blue
         descColor = yellow
         idColor = magenta
@@ -139,17 +143,17 @@ hPutDoc' handle doc = displayIO' handle (renderPretty 0.4 80 doc)
 
 -- TODO this could use some refactoring
 patternMatches :: Transaction -> Pattern -> Bool
-patternMatches (Transaction _ _ obj _ _) (Pattern (Left Description) Is args) =
+patternMatches (Transaction _ _ obj _ _ _) (Pattern (Left Description) Is args) =
     obj `elem` args
-patternMatches (Transaction _ _ obj _ _) (Pattern (Left Description) Matches args) =
+patternMatches (Transaction _ _ obj _ _ _) (Pattern (Left Description) Matches args) =
     any (obj =~) args
-patternMatches (Transaction _ _ _ obj _) (Pattern (Right (TwoWordObject Payer noun)) Matches args) =
+patternMatches (Transaction _ _ _ obj _ _) (Pattern (Right (TwoWordObject Payer noun)) Matches args) =
     twoWordObjectMatches obj noun args
-patternMatches (Transaction _ _ _ _ obj) (Pattern (Right (TwoWordObject Payee noun)) Matches args) =
+patternMatches (Transaction _ _ _ _ obj _) (Pattern (Right (TwoWordObject Payee noun)) Matches args) =
     twoWordObjectMatches obj noun args
-patternMatches (Transaction _ _ _ obj _) (Pattern (Right (TwoWordObject Payer noun)) Is args) =
+patternMatches (Transaction _ _ _ obj _ _) (Pattern (Right (TwoWordObject Payer noun)) Is args) =
     twoWordObjectIs obj noun args
-patternMatches (Transaction _ _ _ _ obj) (Pattern (Right (TwoWordObject Payee noun)) Is args) =
+patternMatches (Transaction _ _ _ _ obj _) (Pattern (Right (TwoWordObject Payee noun)) Is args) =
     twoWordObjectIs obj noun args
 
 twoWordObjectIs :: Posting -> Noun -> Arguments -> Bool
