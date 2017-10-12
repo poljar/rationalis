@@ -7,18 +7,30 @@ HFLAGS := -O --enable-shared --enable-executable-dynamic --disable-library-vanil
 	  --libsubdir=\$compiler/site-local/\$pkgid -f-lib-only --enable-tests     \
 	  $(HFLAGS)
 
+config = $(BUILDDIR)/setup-config
+bindir = $(BUILDDIR)/build/
+executables = rationalis
+
+.PHONY: rationalis pbz-fetcher configure test clean install
+
+rationalis_files = src/Main.hs src/Commands.hs src/Argparse.hs src/Transformations.hs \
+		   src/Transaction.hs src/Config.hs src/Lib.hs src/Rules.hs
+
+pbz_files = src/PBZ.hs src/Lib.hs src/Transaction.hs
+
 all: rationalis pbz-fetcher
 
-.PHONY: install rationalis pbz-fetcher test clean
+rationalis: $(bindir)/rationalis/rationalis
+pbz-fetcher: $(bindir)/pbz-fetcher/pbz-fetcher
 
-rationalis: configure
+$(bindir)/rationalis/rationalis: $(config) $(rationalis_files)
 	$(RUNHASKELL) build exe:rationalis
 
-pbz-fetcher: configure
+$(bindir)/pbz-fetcher/pbz-fetcher: $(config) $(pbz_files)
 	$(RUNHASKELL) build exe:pbz-fetcher
 
-configure: $(BUILDDIR)/setup-config
-$(BUILDDIR)/setup-config:
+configure: $(config)
+$(config):
 	$(RUNHASKELL) configure $(HFLAGS)
 
 install: rationalis
