@@ -207,6 +207,7 @@ parseActionLine = do
 
 parseRule :: Parser Rule
 parseRule = do
+    sc
     ruleName <- parseName
     sc
     patternLines <- some parsePatternLine
