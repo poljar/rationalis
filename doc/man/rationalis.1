@@ -25,15 +25,12 @@
 .Op Fl P Ar password
 .\" ---------------------------------------------------------------------------
 .Sh DESCRIPTION
-Accounting is boring, let a
-.Nm
-do it for you.
 .Nm
 is a command-line tool that fetches and converts monetary transaction
 data from various sources and converts them to the
 .Xr ledger 1
 journal format.
-The conversion step can be customized using regular expressions in the rules file.
+The conversion step can be customized using pattern based rules.
 .Pp
 The commands accepted by
 .Nm
@@ -42,6 +39,7 @@ are as follows:
 .It Cm convert
 Convert transactions to the
 .Xr ledger 1 journal format.
+.Pp
 The command line flags to change the behaviour of the command
 are as follows:
 .Bl -tag -width Ds
@@ -58,7 +56,8 @@ if the flag is not provided stdin is used.
 Run a
 .Ar fetcher
 to get transaction data from remote sources.
-The command line flags to change the behaviour of the command:
+.Pp
+The command line flags to change the behaviour of the command are as follows:
 .Bl -tag -width Ds
 .It Fl o , Fl -output-file Ar file
 Specify an output
@@ -78,8 +77,14 @@ User name which will be passed to the fetcher.
 The
 .Cm pull
 command is used to get automatically transactions from a remote
-location and store them in your ledger directory of choosing.
-The command line flags to change the behaviour of the command:
+location and store them in your ledger directory of choosing. It is a
+combination of the
+.Cm fetch
+and
+.Cm convert
+command.
+.Pp
+The command line flags to change the behaviour of the command are as follows:
 .Bl -tag -width Ds
 .It Fl P , Fl -password Ar password
 Provide the

@@ -1,22 +1,173 @@
 .Dd July 24, 2017
 .Dt RATIONALIS.RULES 5
 .Os
+.\" ---------------------------------------------------------------------------
 .Sh NAME
 .Nm rationalis.rules
-.Nd rationalis configuration file
-.Sh SYNOPSIS
-.Pa $XDG_CONFIG_HOME/rationalis/config
+.Nd rationalis pattern based rules file
+.\" ---------------------------------------------------------------------------
 .Sh DESCRIPTION
-TODO
+rationalis has the ability to modify transactions based on rules in the
+pattern/action format.
+A rationalis rule consists of a rule heading followed by patterns and
+afterwards by suitable actions. The specified patterns need to match for the
+actions to be executed.
+.Pp
+Only the first rule that matches gets executed for a given transaction.
+The rule heading is used to name the rule, an arbitrary name can be chosen
+enclosed in square brackets
+.Ns e.g. Bq Em My Rule .
+Comments can be put anywhere in the file using a hash mark
+.Pq Sq # ,
+and extend to the end of the current line.
+.Pp
+The patterns part of the rule is further explained in the
+.Sx PATTERNS
+section as well as the action part in the
+.Sx ACTIONS
+section.
+.Pp
+The full grammar of the rationalis rules language can be found in the
+.Sx GRAMMAR
+section.
+Some useful examples are found in the
+.Sx EXAMPLES
+section.
+.\" ---------------------------------------------------------------------------
+.Sh PATTERNS
+A pattern consists of an object followed by a pattern match function that
+takes an quoted string as an argument.
+Multiple arguments can be passed to the function if they are separated by the
+.Sq Cm or
+keyword.
+.Pp
+Multiple patterns can be defined in a rule.
+The actions will only be executed if all patterns match.
+.Pp
+Objects are divided into single word objects and two word objects. The two word
+objects are used to select the source and target posting in the transaction
+while the single word objects operate on the first line of the ledger journal
+entry.
+.Pp
+The following objects can be used in a pattern:
+.Pp
+.Bl -tag -width Ds -compact
+.It Ic description
+Select the description of the transaction.
+.It Ic comment
+Select the comment of the transaction.
+.It Cm payer Cm account | Cm currency
+Select the payer posting and select either the
+.Cm account
+or the
+.Cm currency
+of the posting.
+.It Cm payee Cm account | Cm currency
+Select the payee posting and select either the
+.Cm account
+or the
+.Cm currency
+of the posting.
+.El
+.Pp
+The following pattern matching functions can be used:
+.Bl -tag -width Ds
+.It Ic is Ar string
+Matches if the object of the pattern is equal to the
+.Ar string
+of the pattern match
+function.
+.It Ic matches Ar regular-expression
+Matches if the object of the pattern matches to the
+.Ar regular-expression
+provided to the pattern match function.
+.El
+.\" ---------------------------------------------------------------------------
+.Sh ACTIONS
+Actions are used to modify one or more fields in the ledger journal entry. An
+action consists of an action function that operates on an object. Every defined
+action will be executed if the provided patterns match.
+The objects that can be used in a pattern can be used in an action as well.
+.Pp
+The following objects can be used in an action:
+.Pp
+.Bl -tag -width Ds -compact
+.It Ic description
+Select the description of the transaction.
+.It Ic comment
+Select the comment of the transaction.
+.It Cm payer Cm account | Cm currency
+Select the payer posting and select either the
+.Cm account
+or the
+.Cm currency
+of the posting.
+.It Cm payee Cm account | Cm currency
+Select the payee posting and select either the
+.Cm account
+or the
+.Cm currency
+of the posting.
+.El
+.Pp
+The following action functions can be used:
+.Bl -tag -width Ds
+.It Ic set Ar object Ar string
+Set the
+.Ar object
+to the
+.Ar string
+provided to the action function.
+.\" ---------------------------------------------------------------------------
+.Sh GRAMMAR
+Syntax for
+.Nm
+in BNF:
+.Bd -literal
+rule               = ( rule-heading [match-block] [action-block] )
+
+rule-heading       = '[' rule-name ']'
+match-block        = match-clause+
+action-block       = action-clause+
+
+match-clause       = ( object match-verb argument {'or' argument})
+action-clause      = ( 'set' object argument )
+
+object             = single-word-object | two-word-object
+single-word-object = 'description' | 'comment'
+two-word-object    = adjective noun
+
+match-verb         = 'is' | 'matches'
+
+adjective          = 'payer' | 'payee'
+noun               = 'account' | 'currency'
+
+argument           = '"' word+ '"'
+.Ed
+.\" ---------------------------------------------------------------------------
 .Sh FILES
 .Bl -tag -width 34 -compact
-.It Pa $XDG_CONFIG_HOME/rationalis/config
-TODO
+.It Pa $XDG_CONFIG_HOME/rationalis/rules
+Default location of the rationalis rules file.
 .El
+.\" ---------------------------------------------------------------------------
+.Sh EXAMPLES
+In this example we have a rule named "atm", the rule checks the description of
+a transaction using a regular expression.
+In the event of a matching transaction the rule changes the description and the
+payee account of the transaction.
+.Bd -literal -offset indent
+[atm]
+description matches "BANK ATM*"
+set description "ATM CASH"
+set payee account "Expenses:Cash"
+.Ed
+.\" ---------------------------------------------------------------------------
 .Sh SEE ALSO
 .Xr ledger 1 ,
-.Xr rationalis 5 ,
-.Xr rationalis.rules 5
+.Xr rationalis 1 ,
+.Xr rationalis 5
+.\" ---------------------------------------------------------------------------
 .Sh AUTHORS
 .Nm
 was written by
