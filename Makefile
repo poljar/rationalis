@@ -7,6 +7,8 @@ HFLAGS := -O --enable-shared --enable-executable-dynamic --disable-library-vanil
 	  --libsubdir=\$compiler/site-local/\$pkgid -f-lib-only --enable-tests     \
 	  $(HFLAGS)
 
+HMAKEFLAGS := --jobs
+
 config = $(BUILDDIR)/setup-config
 bindir = $(BUILDDIR)/build/
 executables = rationalis
@@ -24,10 +26,10 @@ rationalis: $(bindir)/rationalis/rationalis
 pbz-fetcher: $(bindir)/pbz-fetcher/pbz-fetcher
 
 $(bindir)/rationalis/rationalis: $(config) $(rationalis_files)
-	$(RUNHASKELL) build exe:rationalis
+	$(RUNHASKELL) $(HMAKEFLAGS) build exe:rationalis
 
 $(bindir)/pbz-fetcher/pbz-fetcher: $(config) $(pbz_files)
-	$(RUNHASKELL) build exe:pbz-fetcher
+	$(RUNHASKELL) $(HMAKEFLAGS) build exe:pbz-fetcher
 
 configure: $(config)
 $(config):
@@ -52,5 +54,5 @@ clean:
 	$(RUNHASKELL) clean
 
 test:
-	$(RUNHASKELL) build test:rationalis-test
+	$(RUNHASKELL) $(HMAKEFLAGS) build test:rationalis-test
 	$(RUNHASKELL) test
