@@ -17,10 +17,10 @@
                 "USD"
             ]
         ],
-        "description": "BANK ATM LAKE SHORE DRIVE"
+        "description": "ATM LAKE SHORE DRIVE"
     },
     {
-        "transactionComment": "got a piece of heart finally, bailing now",
+        "transactionComment": "got a 💗, bailing now",
         "payerPosting": [
             "Assets:CTB",
             [
@@ -37,6 +37,6 @@
                 "Rupee"
             ]
         ],
-        "description": "BANK ATM WEST CLOCK TOWN"
+        "description": "ATM WEST CLOCK TOWN"
     }
 ]
