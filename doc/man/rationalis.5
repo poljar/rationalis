@@ -7,13 +7,60 @@
 .Nd rationalis configuration file
 .\" ---------------------------------------------------------------------------
 .Sh DESCRIPTION
-TODO
+.Xr rationalis 1 reads configuration data in the INI file format.
+The configuration file is used to configure
+.Nm rationalis
+accounts, the sections inside the configuration file represent an account.
+.Pp
+The section name enclosed in square brackets represents the account name for the
+.Cm pull
+command.
+The following keys are required in the account sections:
+.Bl -tag -width 3n
+.It Cm fetcher
+Either a full path to a executable or a executable contained in the
+.Ev PATH
+of the user calling
+.Nm rationalis .
+.It Cm user
+The user that
+.Nm rationalis
+will pass to the fetcher for authentication purposes on the remote source.
+.It Cm ledger-dir
+The output directory where rationalis will store the converted transactions. It
+is recommended to use a separate directory for every account and include the
+whole directory inside your main ledger file.
+.Pp
+The files will have a unique name consisting of the account name followed by the
+current date and followed by an optional suffix if there are more than one file
+for the current account and date combination.
+.El
 .\" ---------------------------------------------------------------------------
 .Sh FILES
+.Nm rationalis
+supports the XDG Base Directory Specification, the default locations can be
+overridden using appropriate environment variables.
+.Pp
 .Bl -tag -width 34 -compact
 .It Pa ~/.config/rationalis/config
-TODO
+Default location of the configuration file.
 .El
+.\" ---------------------------------------------------------------------------
+.Sh EXAMPLES
+The following example shows a configured account with the name
+.Em clocktown ,
+the fetcher with a full path to the executable
+.Em ct-fetch ,
+the user
+.Em Ben ,
+and the ouput dir
+.Pa /home/ben/ledger/ct .
+.Bd -literal -offset indent
+[clocktown]
+fetcher: /usr/local/bin/ct-fetch
+user: Ben
+ledger-dir : /home/ben/ledger/ct
+.Ed
 .\" ---------------------------------------------------------------------------
 .Sh SEE ALSO
 .Xr ledger 1 ,
