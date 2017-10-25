@@ -10,8 +10,8 @@
 rationalis has the ability to modify transactions based on rules in the
 pattern/action format.
 A rationalis rule consists of a rule heading followed by patterns and
-afterwards by suitable actions. The specified patterns need to match for the
-actions to be executed.
+afterwards by suitable actions.
+The specified patterns need to match for the actions to be executed.
 .Pp
 Only the first rule that matches gets executed for a given transaction.
 The rule heading is used to name the rule, an arbitrary name can be chosen
@@ -44,10 +44,10 @@ keyword.
 Multiple patterns can be defined in a rule.
 The actions will only be executed if all patterns match.
 .Pp
-Objects are divided into single word objects and two word objects. The two word
-objects are used to select the source and target posting in the transaction
-while the single word objects operate on the first line of the ledger journal
-entry.
+Objects are divided into single word objects and two word objects.
+The two word objects are used to select the source and target posting in the
+transaction while the single word objects operate on the first line of the
+ledger journal entry.
 .Pp
 The following objects can be used in a pattern:
 .Pp
@@ -84,9 +84,9 @@ provided to the pattern match function.
 .El
 .\" ---------------------------------------------------------------------------
 .Sh ACTIONS
-Actions are used to modify one or more fields in the ledger journal entry. An
-action consists of an action function that operates on an object. Every defined
-action will be executed if the provided patterns match.
+Actions are used to modify one or more fields in the ledger journal entry.
+An action consists of an action function that operates on an object.
+Every defined action will be executed if the provided patterns match.
 The objects that can be used in a pattern can be used in an action as well.
 .Pp
 The following objects can be used in an action:
@@ -118,6 +118,7 @@ Set the
 to the
 .Ar string
 provided to the action function.
+.El
 .\" ---------------------------------------------------------------------------
 .Sh GRAMMAR
 Syntax for

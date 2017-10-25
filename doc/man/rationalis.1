@@ -97,8 +97,8 @@ User name which will be passed to the fetcher.
 The
 .Cm pull
 command is used to get automatically transactions from a remote
-location and store them in your ledger directory of choosing. It is a
-combination of the
+location and store them in your ledger directory of choosing.
+It is a combination of the
 .Cm fetch
 and
 .Cm convert
@@ -120,13 +120,15 @@ transactions from a remote source and format it to the
 input format for consumption.
 .Nm
 executes the fetcher and passes it's stdin to the fetcher, it also catches it's
-stdout. Messages from a fetcher can be output via stderr.
+stdout.
+Messages from a fetcher can be output via stderr.
 The input format is discussed in the next subsection
 .Sx Input format .
 .Pp
 .Nm
 passes the fetcher varying information through environment variables, e.g. user
-credentials. The environment variables are listed and described in the
+credentials.
+The environment variables are listed and described in the
 .Sx ENVIRONMENT
 section.
 .\" ---------------------------------------------------------------------------
@@ -137,7 +139,8 @@ The transactions are json objects contained in a list.
 The transaction object itself contains the following fields:
 .Bl -tag -width Ds
 .It Cm description
-The free-form description of the transaction. The type of this field is a
+The free-form description of the transaction.
+The type of this field is a
 string.
 .It Cm payeePosting | payerPosting
 The
@@ -150,8 +153,8 @@ transaction e.g. "Assets:Checking". The second element is a list containing as
 the first element a floating point number describing the amount and as a second
 element a string representing the currency of the transaction.
 .It Cm transactionComment
-A free-form comment for the transaction. The type of this field is string
-and it can be null.
+A free-form comment for the transaction.
+The type of this field is string and it can be null.
 .It Cm transactionDate
 A string containing the date of the transaction in the
 .St -iso8601
@@ -161,7 +164,8 @@ An ID that uniquely identifies the transaction,
 .Nm
 doesn't use this field
 itself but a fetcher should use this field to avoid fetching the same
-transaction multiple times. The type of this field is string.
+transaction multiple times.
+The type of this field is string.
 .El
 .Pp
 An example transaction can be found in the
