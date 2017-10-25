@@ -45,11 +45,11 @@ fromMaybeGlobalOpts (GlobalOptions mConfFile mRuleFile) = do
     confDir <- getXdgDirectory XdgConfig "rationalis"
     confFile <-
         case mConfFile of
-            Nothing -> return (joinPath [confDir, "rationalis.conf"])
+            Nothing -> return (joinPath [confDir, "config"])
             Just f -> checkFile f
     ruleFile <-
         case mRuleFile of
-            Nothing -> return (joinPath [confDir, "rationalis.rules"])
+            Nothing -> return (joinPath [confDir, "rules"])
             Just f -> checkFile f
     return (confFile, ruleFile)
 
