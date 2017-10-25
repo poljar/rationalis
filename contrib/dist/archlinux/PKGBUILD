@@ -3,17 +3,21 @@
 pkgname=rationalis
 pkgver=0.1
 pkgrel=1
-pkgdesc="JSON pretty-printing library and command-line tool."
-url="http://github.com/poljar/rationalis"
-license=("ISC")
+pkgdesc='The accounting plumber'
+url='http://github.com/poljar/rationalis'
+license=('ISC')
 arch=('i686' 'x86_64')
-# TODO
-depends=('ghc-libs' "haskell-aeson" "haskell-attoparsec" "haskell-base-compat" "haskell-cmdargs"
-         "haskell-scientific" "haskell-text" "haskell-unordered-containers" "haskell-vector")
+depends=('ghc-libs' 'haskell-aeson' 'haskell-aeson-pretty' 'haskell-configfile'
+         'haskell-ansi-terminal' 'haskell-ansi-wl-pprint' 'haskell-lens'
+         'haskell-megaparsec' 'haskell-mtl' 'haskell-optparse-applicative'
+         'haskell-regex-pcre' 'haskell-typed-process' 'haskell-http-client'
+         'haskell-http-client-tls' 'haskell-lens-aeson' 'haskell-scientific'
+         'haskell-tagsoup' 'haskell-text' 'haskell-wreq')
 makedepends=('ghc')
+checkdepends('haskell-tasty' 'haskell-tasty-hunit')
 source=("")
-sha512sums=('b429dad73923f6a7a5892b511af19b766d639c21bab8a2b8d1750a1f972c4f55c5139f37773474d303597cd4d02f168515be7b537f33ea62987e77fd3d701e8a')
-validpgpkeys=('487EACC08557AD082088DABA1EB2638FF56C0C53')
+sha512sums=('')
+validpgpkeys=('')
 
 build() {
     make -C "$srcdir/$pkgname-$pkgver"
