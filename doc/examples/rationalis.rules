@@ -1,4 +1,4 @@
-# a simle rule to catch ATM transactions
+# a simple rule to catch ATM transactions
 [atm]
 description matches "BANK ATM*"
 set description "ATM CASH"
