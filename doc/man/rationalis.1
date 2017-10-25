@@ -73,12 +73,9 @@ if the flag is not provided stdin is used.
 Run a
 .Ar fetcher
 to get transaction data from remote sources.
-A
-.Ar fetcher
-is a standalone executable, its primary function is to fetch transactions from a
-remote source and format it for
-.Nm
-for consumtpion.
+More info about fetchers can be found in the
+.Sx Fetchers
+subsection of this manual.
 .Pp
 The command line flags to change the behaviour of the command are as follows:
 .Bl -tag -width Ds
@@ -117,7 +114,21 @@ that will get passed to the fetcher.
 .El
 .\" ---------------------------------------------------------------------------
 .Ss Fetchers
-TODO
+A fetcher is a standalone executable, its primary function is to fetch
+transactions from a remote source and format it to the
+.Nm
+input format for consumption.
+.Nm
+executes the fetcher and passes it's stdin to the fetcher, it also catches it's
+stdout. Messages from a fetcher can be output via stderr.
+The input format is discussed in the next subsection
+.Sx Input format .
+.Pp
+.Nm
+passes the fetcher varying information through environment variables, e.g. user
+credentials. The environment variables are listed and described in the
+.Sx ENVIRONMENT
+section.
 .\" ---------------------------------------------------------------------------
 .Ss Input format
 The input format for rationalis is in the json format.
@@ -125,8 +136,9 @@ The transactions are json objects contained in a list.
 .Pp
 The transaction object itself contains the following fields:
 .Bl -tag -width Ds
-.It Cm descrption
-The freeform description of the transaction. The type of this field is a string.
+.It Cm description
+The free-form description of the transaction. The type of this field is a
+string.
 .It Cm payeePosting | payerPosting
 The
 .Cm payeePosting
@@ -138,7 +150,7 @@ transaction e.g. "Assets:Checking". The second element is a list containing as
 the first element a floating point number describing the amount and as a second
 element a string representing the currency of the transaction.
 .It Cm transactionComment
-A freeform comment for the transaction. The type of this field is string
+A free-form comment for the transaction. The type of this field is string
 and it can be null.
 .It Cm transactionDate
 A string containing the date of the transaction in the
@@ -183,7 +195,7 @@ It's set to the ID of the most recently fetched transaction.
 .Sh FILES
 .Nm
 supports the XDG Base Directory Specification, the default locations can be
-overriden using appropriate environment variables.
+overridden using appropriate environment variables.
 .Pp
 .Bl -tag -width DS -compact
 .It Pa ~/.config/rationalis/config
@@ -235,7 +247,7 @@ The following example shows a a input file containing a single transactions:
 .Ed
 .Pp
 The following example shows how to run
-.Nm rationalis
+.Nm
 to convert the previous transaction to the ledger format, the transactions are
 contained in the transactions.json file:
 .Bd -unfilled
