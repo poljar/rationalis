@@ -20,22 +20,21 @@ executable rationalis
                        Transaction
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , mtl
-                     , bytestring
-                     , text
-                     , time
-                     , lens
-                     , aeson
-                     , filepath
-                     , directory
-                     , megaparsec
-                     , ansi-wl-pprint
-                     , regex-pcre
-                     , ansi-terminal
-                     , aeson-pretty
                      , ConfigFile
-                     , typed-process
+                     , aeson
+                     , aeson-pretty
+                     , ansi-terminal
+                     , ansi-wl-pprint
+                     , bytestring
+                     , directory
+                     , filepath
+                     , lens
+                     , megaparsec
+                     , mtl
                      , optparse-applicative
+                     , regex-pcre
+                     , time
+                     , typed-process
   default-language:    Haskell2010
 
 executable pbz-fetcher
@@ -44,20 +43,19 @@ executable pbz-fetcher
   other-modules:       Lib, Transaction
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , bytestring
-                     , text
-                     , time
-                     , lens
-                     , wreq
                      , aeson
-                     , tagsoup
-                     , scientific
-                     , lens-aeson
                      , ansi-terminal
                      , ansi-wl-pprint
+                     , bytestring
                      , http-client
                      , http-client-tls
-                     , optparse-applicative
+                     , lens
+                     , lens-aeson
+                     , scientific
+                     , tagsoup
+                     , text
+                     , time
+                     , wreq
   default-language:    Haskell2010
 
 test-suite rationalis-test
@@ -66,16 +64,16 @@ test-suite rationalis-test
   other-modules:       Argparse, Lib, Rules
   main-is:             Spec.hs
   build-depends:       base
-                     , tasty
                      , aeson
-                     , time
-                     , bytestring
-                     , regex-pcre
-                     , megaparsec
-                     , tasty-hunit
                      , ansi-terminal
                      , ansi-wl-pprint
+                     , bytestring
+                     , megaparsec
                      , optparse-applicative
+                     , regex-pcre
+                     , tasty
+                     , tasty-hunit
+                     , time
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
