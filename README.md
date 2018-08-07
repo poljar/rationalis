@@ -1,5 +1,5 @@
-# rationalis
-====================
+rationalis
+==========
 
 - [Intro](#intro)
 - [Installation](#installation)
@@ -38,3 +38,5 @@ Requirements
 ------------
 
 The requirements can be found in the [cabal](rationalis.cabal) file.
+
+[stack]: http://docs.haskellstack.org/en/stable/install_and_upgrade.html
