@@ -12,14 +12,18 @@ module Config
 
 import Control.Monad.Except
 import Data.ConfigFile
+import Data.Semigroup
 
 newtype Config =
     Config Accounts
     deriving (Show)
 
+instance Semigroup Config where
+    (<>) (Config a) (Config b) = Config (a ++ b)
+
 instance Monoid Config where
     mempty = Config []
-    mappend (Config a) (Config b) = Config (a ++ b)
+    mappend = (Data.Semigroup.<>)
 
 type Accounts = [Account]
 

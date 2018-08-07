@@ -19,6 +19,11 @@ executable rationalis
   other-modules:       Argparse, Commands, Rules, Lib, Config, Transformations,
                        Transaction
   ghc-options:         -W -threaded -rtsopts -with-rtsopts=-N
+
+  if impl(ghc <= 8.0)
+    ghc-options: -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
+    build-depends: semigroups == 0.18.*
+
   build-depends:       base
                      , ConfigFile
                      , aeson
